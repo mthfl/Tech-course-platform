@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Tempo de geração: 06/11/2025 às 00:54
+-- Tempo de geração: 06/11/2025 às 05:05
 -- Versão do servidor: 10.4.32-MariaDB
 -- Versão do PHP: 8.2.12
 
@@ -36,6 +36,32 @@ CREATE TABLE `atividades` (
   `ordem` int(11) NOT NULL,
   `ativo` tinyint(1) DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Despejando dados para a tabela `atividades`
+--
+
+INSERT INTO `atividades` (`id`, `modulo_id`, `titulo`, `descricao`, `tipo`, `ordem`, `ativo`) VALUES
+(1, 1, 'Quiz: Conceitos Básicos do Git', 'Teste seus conhecimentos sobre os fundamentos do Git', 'questionario', 1, 1),
+(2, 1, 'Exercício: Primeiro Repositório', 'Crie seu primeiro repositório Git', 'exercicio', 2, 1),
+(3, 2, 'Quiz: Branches e Merge', 'Avalie seu entendimento sobre branches', 'questionario', 1, 1),
+(4, 2, 'Projeto: Trabalhando com Branches', 'Pratique criação e merge de branches', 'projeto', 2, 1),
+(5, 3, 'Quiz: Github Básico', 'Teste seus conhecimentos sobre Github', 'questionario', 1, 1),
+(6, 3, 'Projeto: Colaboração em Equipe', 'Trabalhe em um projeto colaborativo no Github', 'projeto', 2, 1),
+(7, 4, 'Quiz: Conhecendo o Padlet', 'Avalie seu conhecimento sobre Padlet', 'questionario', 1, 1),
+(8, 4, 'Exercício: Criando seu Primeiro Padlet', 'Crie e configure um Padlet', 'exercicio', 2, 1),
+(9, 5, 'Quiz: Gestão de Sprint', 'Teste seus conhecimentos sobre gestão de sprint', 'questionario', 1, 1),
+(10, 5, 'Projeto: Organizando uma Sprint', 'Organize uma sprint completa no Padlet', 'projeto', 2, 1),
+(11, 6, 'Quiz: Fundamentos do React', 'Avalie seu conhecimento sobre React', 'questionario', 1, 1),
+(12, 6, 'Exercício: Primeiro Componente React', 'Crie seu primeiro componente React', 'exercicio', 2, 1),
+(13, 7, 'Quiz: Vue.js Básico', 'Teste seus conhecimentos sobre Vue.js', 'questionario', 1, 1),
+(14, 7, 'Projeto: Aplicação Vue', 'Desenvolva uma aplicação simples com Vue.js', 'projeto', 2, 1),
+(15, 8, 'Quiz: Angular Essencial', 'Avalie seu entendimento sobre Angular', 'questionario', 1, 1),
+(16, 8, 'Exercício: Componentes Angular', 'Pratique criação de componentes no Angular', 'exercicio', 2, 1),
+(17, 9, 'Quiz: FPDF Básico', 'Teste seus conhecimentos sobre FPDF', 'questionario', 1, 1),
+(18, 9, 'Exercício: Gerando seu Primeiro PDF', 'Crie um PDF usando FPDF', 'exercicio', 2, 1),
+(19, 10, 'Quiz: Bibliotecas de Documentos', 'Avalie seu conhecimento sobre bibliotecas', 'questionario', 1, 1),
+(20, 10, 'Projeto: Sistema de Relatórios', 'Desenvolva um sistema completo de geração de relatórios', 'projeto', 2, 1);
 
 -- --------------------------------------------------------
 
@@ -99,6 +125,22 @@ CREATE TABLE `modulos` (
   `ordem` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Despejando dados para a tabela `modulos`
+--
+
+INSERT INTO `modulos` (`id`, `curso_id`, `titulo`, `descricao`, `ordem`) VALUES
+(1, 1, 'Fundamentos do Git', 'Aprenda os conceitos básicos do Git e controle de versão', 1),
+(2, 1, 'Trabalhando com Branches', 'Domine o uso de branches e merge no Git', 2),
+(3, 1, 'Github e Colaboração', 'Aprenda a usar Github para trabalho em equipe', 3),
+(4, 2, 'Introdução ao Padlet', 'Conheça a ferramenta Padlet e suas funcionalidades', 1),
+(5, 2, 'Gestão de Sprint com Padlet', 'Organize e gerencie sprints usando Padlet', 2),
+(6, 3, 'Introdução ao React', 'Fundamentos do React e componentes', 1),
+(7, 3, 'Vue.js Essencial', 'Aprenda os conceitos básicos do Vue.js', 2),
+(8, 3, 'Angular Fundamentals', 'Introdução ao framework Angular', 3),
+(9, 4, 'Introdução ao FPDF', 'Aprenda a gerar PDFs com FPDF', 1),
+(10, 4, 'Bibliotecas Avançadas', 'Explore outras bibliotecas para geração de documentos', 2);
+
 -- --------------------------------------------------------
 
 --
@@ -134,6 +176,24 @@ CREATE TABLE `opcoes_pergunta` (
   `correta` tinyint(1) DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Despejando dados para a tabela `opcoes_pergunta`
+--
+
+INSERT INTO `opcoes_pergunta` (`id`, `pergunta_id`, `texto_opcao`, `correta`) VALUES
+(1, 1, 'Um sistema de controle de versão distribuído', 1),
+(2, 1, 'Um editor de texto', 0),
+(3, 1, 'Um banco de dados', 0),
+(4, 1, 'Uma linguagem de programação', 0),
+(5, 2, 'git init', 1),
+(6, 2, 'git start', 0),
+(7, 2, 'git create', 0),
+(8, 2, 'git new', 0),
+(9, 3, 'Salva as alterações no repositório local', 1),
+(10, 3, 'Envia alterações para o servidor remoto', 0),
+(11, 3, 'Cria uma nova branch', 0),
+(12, 3, 'Deleta arquivos do repositório', 0);
+
 -- --------------------------------------------------------
 
 --
@@ -148,6 +208,15 @@ CREATE TABLE `perguntas` (
   `ordem` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Despejando dados para a tabela `perguntas`
+--
+
+INSERT INTO `perguntas` (`id`, `atividade_id`, `pergunta`, `tipo`, `ordem`) VALUES
+(1, 1, 'O que é Git?', 'multipla_escolha', 1),
+(2, 1, 'Qual comando inicializa um repositório Git?', 'multipla_escolha', 2),
+(3, 1, 'O que faz o comando git commit?', 'multipla_escolha', 3);
+
 -- --------------------------------------------------------
 
 --
@@ -161,6 +230,32 @@ CREATE TABLE `recompensas` (
   `coins` int(11) DEFAULT 0,
   `xp` int(11) DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Despejando dados para a tabela `recompensas`
+--
+
+INSERT INTO `recompensas` (`id`, `tipo_referencia`, `referencia_id`, `coins`, `xp`) VALUES
+(1, 'atividade', 1, 10, 50),
+(2, 'atividade', 2, 15, 75),
+(3, 'atividade', 3, 10, 50),
+(4, 'atividade', 4, 20, 100),
+(5, 'atividade', 5, 10, 50),
+(6, 'atividade', 6, 25, 125),
+(7, 'atividade', 7, 10, 50),
+(8, 'atividade', 8, 15, 75),
+(9, 'atividade', 9, 10, 50),
+(10, 'atividade', 10, 20, 100),
+(11, 'atividade', 11, 15, 75),
+(12, 'atividade', 12, 20, 100),
+(13, 'atividade', 13, 15, 75),
+(14, 'atividade', 14, 25, 125),
+(15, 'atividade', 15, 15, 75),
+(16, 'atividade', 16, 20, 100),
+(17, 'atividade', 17, 15, 75),
+(18, 'atividade', 18, 20, 100),
+(19, 'atividade', 19, 15, 75),
+(20, 'atividade', 20, 30, 150);
 
 -- --------------------------------------------------------
 
@@ -373,7 +468,7 @@ ALTER TABLE `videos_assistidos`
 -- AUTO_INCREMENT de tabela `atividades`
 --
 ALTER TABLE `atividades`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
 -- AUTO_INCREMENT de tabela `compras_cursos`
@@ -391,25 +486,25 @@ ALTER TABLE `cursos`
 -- AUTO_INCREMENT de tabela `modulos`
 --
 ALTER TABLE `modulos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT de tabela `opcoes_pergunta`
 --
 ALTER TABLE `opcoes_pergunta`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT de tabela `perguntas`
 --
 ALTER TABLE `perguntas`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT de tabela `recompensas`
 --
 ALTER TABLE `recompensas`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
 
 --
 -- AUTO_INCREMENT de tabela `respostas_usuarios`

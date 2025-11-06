@@ -20,6 +20,12 @@
             --card-bg: rgba(45, 45, 45, 0.9);
             --sidebar-bg: #2d2d2d;
             --sidebar-active: rgba(0, 179, 72, 0.2);
+            --text-secondary: #94a3b8;
+            --border-color: rgba(0, 179, 72, 0.2);
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.5);
+            --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.5);
+            --shadow-lg: 0 10px 40px rgba(0, 0, 0, 0.6);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         * {
@@ -32,315 +38,420 @@
         body {
             background-color: var(--background-color);
             min-height: 100vh;
-            background-image: radial-gradient(circle at 10% 20%, rgba(52, 152, 219, 0.05) 0%, rgba(52, 152, 219, 0) 20%),
-                              radial-gradient(circle at 90% 80%, rgba(46, 204, 113, 0.05) 0%, rgba(46, 204, 113, 0) 20%);
             color: var(--text-color);
-            transition: background-color 0.3s ease;
+            position: relative;
+            overflow-x: hidden;
+            background-image: radial-gradient(circle at 10% 20%, rgba(0, 179, 72, 0.05) 0%, rgba(0, 179, 72, 0) 20%),
+                              radial-gradient(circle at 90% 80%, rgba(255, 183, 51, 0.05) 0%, rgba(255, 183, 51, 0) 20%);
         }
 
         .navbar {
             background: linear-gradient(135deg, #007A33 0%, #1A3C34 100%);
-            color: white;
-            padding: 15px 0;
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(0, 179, 72, 0.2);
+            padding: 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
             box-shadow: 0 4px 25px -5px rgba(0, 122, 51, 0.3);
         }
 
         .navbar .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
-            padding: 0 20px;
+            padding: 0 32px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            flex-wrap: wrap;
-            gap: 15px;
+            height: 72px;
         }
 
         .navbar .logo {
-            font-size: 24px;
+            font-size: 22px;
             font-weight: 700;
             font-family: 'Poppins', sans-serif;
             color: white;
             text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: var(--transition);
+        }
+
+        .navbar .logo::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: var(--accent-color);
+            border-radius: 50%;
+            box-shadow: 0 0 20px var(--accent-color);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.2); }
         }
 
         .navbar .nav-menu {
             display: flex;
             list-style: none;
-            gap: 15px;
+            gap: 8px;
             align-items: center;
-            flex-wrap: wrap;
         }
 
         .navbar .nav-menu a {
-            color: white;
+            color: var(--text-secondary);
             text-decoration: none;
-            padding: 8px 15px;
-            border-radius: 8px;
-            transition: all 0.3s;
+            padding: 10px 18px;
+            border-radius: 10px;
+            transition: var(--transition);
             font-weight: 500;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            position: relative;
         }
 
         .navbar .nav-menu a:hover {
             background: rgba(255, 183, 51, 0.2);
-            transform: translateY(-2px);
+            color: var(--accent-color);
+        }
+
+        .navbar .nav-menu a i {
+            font-size: 16px;
         }
 
         .navbar .user-info {
             display: flex;
-            gap: 15px;
-            padding: 8px 15px;
-            background: rgba(255, 255, 255, 0.15);
-            border-radius: 10px;
+            gap: 16px;
+            padding: 10px 20px;
+            background: rgba(0, 179, 72, 0.08);
+            border: 1px solid rgba(0, 179, 72, 0.2);
+            border-radius: 12px;
             font-weight: 500;
+            font-size: 13px;
+        }
+
+        .navbar .user-info span {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--text-secondary);
+        }
+
+        .navbar .user-info span i {
+            color: var(--header-color);
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
-            padding: 30px 20px;
+            padding: 40px 32px;
+            position: relative;
+            z-index: 1;
         }
 
         .dashboard-header {
-            margin-bottom: 30px;
+            margin-bottom: 40px;
+            padding: 32px;
+            background: linear-gradient(135deg, rgba(0, 179, 72, 0.1) 0%, rgba(0, 179, 72, 0.02) 100%);
+            border-radius: 20px;
+            border: 1px solid rgba(0, 179, 72, 0.15);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dashboard-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(0, 179, 72, 0.08) 0%, transparent 70%);
+            pointer-events: none;
         }
 
         .dashboard-header h1 {
             color: #ffffff;
-            font-size: 32px;
+            font-size: 36px;
             font-family: 'Poppins', sans-serif;
             font-weight: 700;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
+            position: relative;
         }
 
         .dashboard-header p {
-            color: #94a3b8;
+            color: var(--text-secondary);
             font-size: 16px;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .stat-card {
-            background-color: var(--card-bg);
-            border-radius: 12px;
-            padding: 1.5rem;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(0, 179, 72, 0.2);
-        }
-
-        .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 15px rgba(0, 179, 72, 0.2);
-            border-color: rgba(0, 179, 72, 0.4);
-        }
-
-        .stat-card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 15px;
-        }
-
-        .stat-card-title {
-            font-size: 14px;
-            color: #94a3b8;
-            font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .stat-card-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-        }
-
-        .stat-card-icon.primary {
-            background: rgba(0, 179, 72, 0.2);
-            color: #00b348;
-        }
-
-        .stat-card-icon.warning {
-            background: rgba(255, 183, 51, 0.2);
-            color: #ffb733;
-        }
-
-        .stat-card-icon.danger {
-            background: rgba(239, 68, 68, 0.2);
-            color: #ef4444;
-        }
-
-        .stat-card-icon.info {
-            background: rgba(59, 130, 246, 0.2);
-            color: #3b82f6;
-        }
-
-        .stat-card-value {
-            font-size: 36px;
-            font-weight: 700;
-            color: #ffffff;
-            font-family: 'Poppins', sans-serif;
+            position: relative;
         }
 
         .courses-section {
-            background-color: var(--card-bg);
-            padding: 30px;
-            border-radius: 16px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(0, 179, 72, 0.2);
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--border-color);
         }
 
         .courses-section h2 {
             color: #ffffff;
-            font-size: 24px;
+            font-size: 28px;
             font-family: 'Poppins', sans-serif;
             font-weight: 700;
-            margin-bottom: 25px;
+            margin-bottom: 32px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .courses-section h2 i {
+            color: var(--header-color);
+            font-size: 24px;
         }
 
         .course-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 24px;
         }
 
         .course-card {
             background: rgba(30, 30, 30, 0.8);
-            border: 2px solid rgba(0, 179, 72, 0.2);
-            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
             overflow: hidden;
-            transition: all 0.3s;
+            transition: var(--transition);
             cursor: pointer;
+            position: relative;
+        }
+
+        .course-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--header-color), var(--accent-color));
+            transform: scaleX(0);
+            transition: var(--transition);
         }
 
         .course-card:hover {
-            border-color: #00b348;
-            transform: translateY(-5px);
-            box-shadow: 0 8px 20px rgba(0, 179, 72, 0.2);
+            border-color: rgba(0, 179, 72, 0.4);
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .course-card:hover::before {
+            transform: scaleX(1);
         }
 
         .course-card-header {
-            padding: 20px;
-            background: linear-gradient(135deg, rgba(0, 179, 72, 0.1) 0%, rgba(0, 179, 72, 0.05) 100%);
+            padding: 24px;
+            background: linear-gradient(135deg, rgba(0, 179, 72, 0.08) 0%, rgba(0, 179, 72, 0.02) 100%);
+            position: relative;
         }
 
         .course-card-title {
             color: #ffffff;
-            font-size: 18px;
+            font-size: 19px;
             font-weight: 600;
-            margin-bottom: 8px;
+            margin-bottom: 12px;
+            line-height: 1.4;
         }
 
         .course-card-level {
-            display: inline-block;
-            padding: 4px 12px;
-            background: rgba(0, 179, 72, 0.2);
-            color: #00b348;
-            border-radius: 12px;
-            font-size: 12px;
-            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            background: rgba(0, 179, 72, 0.15);
+            color: var(--header-color);
+            border: 1px solid rgba(0, 179, 72, 0.3);
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
             text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .course-card-body {
-            padding: 20px;
+            padding: 24px;
         }
 
         .course-card-description {
-            color: #94a3b8;
+            color: var(--text-secondary);
             font-size: 14px;
-            line-height: 1.6;
-            margin-bottom: 15px;
+            line-height: 1.7;
+            margin-bottom: 20px;
         }
 
         .course-card-footer {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding-top: 15px;
+            padding-top: 20px;
             border-top: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .course-card-price {
-            color: #ffb733;
-            font-size: 20px;
+            color: var(--accent-color);
+            font-size: 22px;
             font-weight: 700;
         }
 
         .btn {
-            display: inline-block;
-            padding: 10px 20px;
-            background: linear-gradient(135deg, #00b348 0%, #007A33 100%);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, var(--header-color) 0%, #007A33 100%);
             color: white;
             text-decoration: none;
             border: none;
-            border-radius: 8px;
+            border-radius: 10px;
             font-size: 14px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: var(--transition);
+            box-shadow: 0 4px 15px rgba(0, 179, 72, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, transparent 100%);
+            opacity: 0;
+            transition: var(--transition);
         }
 
         .btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(0, 179, 72, 0.3);
+            box-shadow: 0 8px 25px rgba(0, 179, 72, 0.4);
+        }
+
+        .btn:hover::before {
+            opacity: 1;
         }
 
         .btn-secondary {
-            background: linear-gradient(135deg, #ffb733 0%, #f59e0b 100%);
+            background: linear-gradient(135deg, var(--accent-color) 0%, #f59e0b 100%);
+            box-shadow: 0 4px 15px rgba(251, 191, 36, 0.3);
         }
 
         .empty-state {
             text-align: center;
-            padding: 60px 20px;
-            color: #94a3b8;
+            padding: 80px 20px;
+            color: var(--text-secondary);
         }
 
         .empty-state i {
-            font-size: 64px;
-            margin-bottom: 20px;
-            opacity: 0.5;
+            font-size: 72px;
+            margin-bottom: 24px;
+            opacity: 0.3;
+            background: linear-gradient(135deg, var(--header-color), var(--accent-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .empty-state p {
+            font-size: 16px;
+            margin-bottom: 32px;
+            line-height: 1.6;
+        }
+
+        .alert {
+            padding: 16px 20px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 14px;
+            font-weight: 500;
+            backdrop-filter: blur(10px);
+        }
+
+        .alert i {
+            font-size: 18px;
+        }
+
+        .alert-error {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
+        }
+
+        .alert-success {
+            background: rgba(0, 179, 72, 0.15);
+            border: 1px solid rgba(0, 179, 72, 0.3);
+            color: #86efac;
+        }
+
+        @media (max-width: 1024px) {
+            .navbar .container {
+                padding: 0 24px;
+            }
+            
+            .container {
+                padding: 32px 24px;
+            }
         }
 
         @media (max-width: 768px) {
             .navbar .container {
+                height: auto;
                 flex-direction: column;
+                padding: 16px;
+                gap: 16px;
             }
 
-            .stats-grid {
-                grid-template-columns: 1fr;
+            .navbar .nav-menu {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .navbar .user-info {
+                order: -1;
+                width: 100%;
+                justify-content: center;
+            }
+
+            .dashboard-header h1 {
+                font-size: 28px;
             }
 
             .course-grid {
                 grid-template-columns: 1fr;
             }
+
+            .courses-section {
+                padding: 24px;
+            }
         }
     </style>
-        
-        
-    
 </head>
 <body>
     <nav class="navbar">
         <div class="container">
             <a href="<?php echo BASE_PATH; ?>/dashboard" class="logo">
-                <?php echo APP_NAME; ?>
+              Área Dev
             </a>
             <ul class="nav-menu">
                 <li><a href="<?php echo BASE_PATH; ?>/dashboard"><i class="fas fa-home"></i> Dashboard</a></li>
                 <li><a href="<?php echo BASE_PATH; ?>/cursos"><i class="fas fa-book"></i> Cursos</a></li>
                 <li><a href="<?php echo BASE_PATH; ?>/meus-cursos"><i class="fas fa-graduation-cap"></i> Meus Cursos</a></li>
-                <li><a href="<?php echo BASE_PATH; ?>/atividades"><i class="fas fa-tasks"></i> Atividades</a></li>
+                
                 <li class="user-info">
                     <span><i class="fas fa-user-circle"></i> <?php echo ucfirst($_SESSION['usuario_nivel']); ?></span>
                     <span><i class="fas fa-coins"></i> <?php echo $_SESSION['usuario_coins']; ?></span>
@@ -353,72 +464,22 @@
 
     <div class="container">
         <?php if (isset($_SESSION['erro'])): ?>
-            <div style="background: rgba(239, 68, 68, 0.2); border: 1px solid #ef4444; color: #ef4444; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+            <div class="alert alert-error">
                 <i class="fas fa-exclamation-triangle"></i>
                 <span><?php echo $_SESSION['erro']; unset($_SESSION['erro']); ?></span>
             </div>
         <?php endif; ?>
 
         <?php if (isset($_SESSION['sucesso'])): ?>
-            <div style="background: rgba(0, 179, 72, 0.2); border: 1px solid #00b348; color: #00b348; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+            <div class="alert alert-success">
                 <i class="fas fa-check-circle"></i>
                 <span><?php echo $_SESSION['sucesso']; unset($_SESSION['sucesso']); ?></span>
             </div>
         <?php endif; ?>
 
         <div class="dashboard-header">
-            <h1>Olá, <?php echo $_SESSION['usuario_nome']; ?>! </h1>
+            <h1>Olá, <?php echo $_SESSION['usuario_nome']; ?>! 👋</h1>
             <p>Bem-vindo ao seu painel de aprendizado</p>
-        </div>
-
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-card-header">
-                    <div>
-                        <div class="stat-card-title">Nível Atual</div>
-                        <div class="stat-card-value"><?php echo ucfirst($_SESSION['usuario_nivel']); ?></div>
-                    </div>
-                    <div class="stat-card-icon primary">
-                        <i class="fas fa-user-circle"></i>
-                    </div>
-                </div>
-            </div>
-
-            <div class="stat-card">
-                <div class="stat-card-header">
-                    <div>
-                        <div class="stat-card-title">Coins</div>
-                        <div class="stat-card-value"><?php echo $_SESSION['usuario_coins']; ?></div>
-                    </div>
-                    <div class="stat-card-icon warning">
-                        <i class="fas fa-coins"></i>
-                    </div>
-                </div>
-            </div>
-
-            <div class="stat-card">
-                <div class="stat-card-header">
-                    <div>
-                        <div class="stat-card-title">Experiência</div>
-                        <div class="stat-card-value"><?php echo $_SESSION['usuario_xp']; ?> XP</div>
-                    </div>
-                    <div class="stat-card-icon info">
-                        <i class="fas fa-star"></i>
-                    </div>
-                </div>
-            </div>
-
-            <div class="stat-card">
-                <div class="stat-card-header">
-                    <div>
-                        <div class="stat-card-title">Cursos Ativos</div>
-                        <div class="stat-card-value"><?php echo count($cursos_comprados); ?></div>
-                    </div>
-                    <div class="stat-card-icon primary">
-                        <i class="fas fa-graduation-cap"></i>
-                    </div>
-                </div>
-            </div>
         </div>
 
         <div class="courses-section">
@@ -435,7 +496,7 @@
                             <div class="course-card-body">
                                 <p class="course-card-description"><?php echo htmlspecialchars(substr($curso['descricao'], 0, 100)); ?>...</p>
                                 <div class="course-card-footer">
-                                    <span style="color: #00b348; font-weight: 600;">
+                                    <span style="color: var(--header-color); font-weight: 600; display: flex; align-items: center; gap: 6px;">
                                         <i class="fas fa-check-circle"></i> Adquirido
                                     </span>
                                     <a href="<?php echo BASE_PATH; ?>/curso/<?php echo $curso['id']; ?>" class="btn" onclick="event.stopPropagation();">
@@ -449,7 +510,7 @@
             <?php else: ?>
                 <div class="empty-state">
                     <i class="fas fa-book-open"></i>
-                    <p>Você ainda não possui cursos. Explore nossa biblioteca e comece a aprender!</p>
+                    <p>Você ainda não possui cursos.<br>Explore nossa biblioteca e comece a aprender!</p>
                     <a href="<?php echo BASE_PATH; ?>/cursos" class="btn">
                         <i class="fas fa-search"></i> Explorar Cursos
                     </a>

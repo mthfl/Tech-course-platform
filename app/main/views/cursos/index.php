@@ -10,82 +10,168 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+        :root {
+            --background-color: #1a1a1a;
+            --text-color: #ffffff;
+            --header-color: #00b348;
+            --accent-color: #ffb733;
+            --card-bg: rgba(45, 45, 45, 0.9);
+            --sidebar-bg: #2d2d2d;
+            --sidebar-active: rgba(0, 179, 72, 0.2);
+            --text-secondary: #94a3b8;
+            --border-color: rgba(0, 179, 72, 0.2);
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.5);
+            --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.5);
+            --shadow-lg: 0 10px 40px rgba(0, 0, 0, 0.6);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
 
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: #1a1a1a;
-            background-image: radial-gradient(circle at 10% 20%, rgba(52, 152, 219, 0.05) 0%, rgba(52, 152, 219, 0) 20%),
-                              radial-gradient(circle at 90% 80%, rgba(46, 204, 113, 0.05) 0%, rgba(46, 204, 113, 0) 20%);
+            background-color: var(--background-color);
             min-height: 100vh;
-            color: #ffffff;
+            color: var(--text-color);
+            position: relative;
+            overflow-x: hidden;
+            background-image: radial-gradient(circle at 10% 20%, rgba(0, 179, 72, 0.05) 0%, rgba(0, 179, 72, 0) 20%),
+                              radial-gradient(circle at 90% 80%, rgba(255, 183, 51, 0.05) 0%, rgba(255, 183, 51, 0) 20%);
         }
 
         .navbar {
             background: linear-gradient(135deg, #007A33 0%, #1A3C34 100%);
-            color: white;
-            padding: 15px 0;
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(0, 179, 72, 0.2);
+            padding: 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
             box-shadow: 0 4px 25px -5px rgba(0, 122, 51, 0.3);
         }
 
         .navbar .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
-            padding: 0 20px;
+            padding: 0 32px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            flex-wrap: wrap;
-            gap: 15px;
+            height: 72px;
         }
 
         .navbar .logo {
-            font-size: 24px;
+            font-size: 22px;
             font-weight: 700;
             font-family: 'Poppins', sans-serif;
             color: white;
             text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: var(--transition);
+        }
+
+        .navbar .logo::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: var(--accent-color);
+            border-radius: 50%;
+            box-shadow: 0 0 20px var(--accent-color);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.2); }
         }
 
         .navbar .nav-menu {
             display: flex;
             list-style: none;
-            gap: 15px;
+            gap: 8px;
             align-items: center;
-            flex-wrap: wrap;
         }
 
         .navbar .nav-menu a {
-            color: white;
+            color: var(--text-secondary);
             text-decoration: none;
-            padding: 8px 15px;
-            border-radius: 8px;
-            transition: all 0.3s;
+            padding: 10px 18px;
+            border-radius: 10px;
+            transition: var(--transition);
             font-weight: 500;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            position: relative;
         }
 
         .navbar .nav-menu a:hover {
             background: rgba(255, 183, 51, 0.2);
-            transform: translateY(-2px);
+            color: var(--accent-color);
+        }
+
+        .navbar .nav-menu a i {
+            font-size: 16px;
         }
 
         .navbar .user-info {
             display: flex;
-            gap: 15px;
-            padding: 8px 15px;
-            background: rgba(255, 255, 255, 0.15);
-            border-radius: 10px;
+            gap: 16px;
+            padding: 10px 20px;
+            background: rgba(0, 179, 72, 0.08);
+            border: 1px solid rgba(0, 179, 72, 0.2);
+            border-radius: 12px;
             font-weight: 500;
+            font-size: 13px;
+        }
+
+        .navbar .user-info span {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--text-secondary);
+        }
+
+        .navbar .user-info span i {
+            color: var(--header-color);
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
-            padding: 30px 20px;
+            padding: 40px 32px;
+            position: relative;
+            z-index: 1;
         }
 
         .page-header {
-            margin-bottom: 30px;
+            margin-bottom: 40px;
+            padding: 32px;
+            background: linear-gradient(135deg, rgba(0, 179, 72, 0.1) 0%, rgba(0, 179, 72, 0.02) 100%);
+            border-radius: 20px;
+            border: 1px solid rgba(0, 179, 72, 0.15);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .page-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(0, 179, 72, 0.08) 0%, transparent 70%);
+            pointer-events: none;
         }
 
         .page-header h1 {
@@ -93,51 +179,83 @@
             font-size: 36px;
             font-family: 'Poppins', sans-serif;
             font-weight: 700;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .page-header h1 i {
+            color: var(--header-color);
+            font-size: 32px;
         }
 
         .page-header p {
-            color: #94a3b8;
-            font-size: 18px;
+            color: var(--text-secondary);
+            font-size: 16px;
+            position: relative;
         }
 
         .course-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 25px;
+            gap: 24px;
         }
 
         .course-card {
-            background: rgba(45, 45, 45, 0.9);
+            background: var(--card-bg);
             border-radius: 16px;
             overflow: hidden;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-            transition: all 0.3s;
-            border: 2px solid rgba(0, 179, 72, 0.2);
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+            border: 1px solid var(--border-color);
+            position: relative;
+        }
+
+        .course-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--header-color), var(--accent-color));
+            transform: scaleX(0);
+            transition: var(--transition);
         }
 
         .course-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 20px rgba(0, 179, 72, 0.2);
-            border-color: #00b348;
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-lg);
+            border-color: rgba(0, 179, 72, 0.4);
+        }
+
+        .course-card:hover::before {
+            transform: scaleX(1);
         }
 
         .course-card.bloqueado {
             opacity: 0.6;
-            position: relative;
         }
 
-        .course-card.bloqueado::before {
+        .course-card.bloqueado::after {
             content: '';
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0, 0, 0, 0.3);
+            background: rgba(0, 0, 0, 0.5);
             border-radius: 16px;
             z-index: 1;
             pointer-events: none;
+            backdrop-filter: blur(2px);
+        }
+
+        .course-card.bloqueado:hover {
+            transform: translateY(0);
+            box-shadow: var(--shadow-sm);
         }
 
         .course-image {
@@ -148,11 +266,52 @@
             align-items: center;
             justify-content: center;
             color: white;
-            font-size: 48px;
+            font-size: 56px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .course-image::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            0%, 100% { transform: translate(-50%, -50%) rotate(0deg); }
+            50% { transform: translate(-30%, -30%) rotate(180deg); }
+        }
+
+        .course-image i {
+            position: relative;
+            z-index: 1;
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+        }
+
+        .lock-icon {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 72px;
+            color: rgba(255, 255, 255, 0.9);
+            z-index: 2;
+            filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.5));
+            animation: lockPulse 2s infinite;
+        }
+
+        @keyframes lockPulse {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.1); }
         }
 
         .course-body {
-            padding: 20px;
+            padding: 24px;
         }
 
         .course-header {
@@ -161,108 +320,171 @@
 
         .course-title {
             color: #ffffff;
-            font-size: 22px;
+            font-size: 19px;
             font-family: 'Poppins', sans-serif;
             font-weight: 600;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
+            line-height: 1.4;
         }
 
         .course-level {
-            display: inline-block;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
             padding: 6px 14px;
-            background: rgba(0, 179, 72, 0.2);
-            color: #00b348;
+            background: rgba(0, 179, 72, 0.15);
+            color: var(--header-color);
+            border: 1px solid rgba(0, 179, 72, 0.3);
             border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
+            font-size: 11px;
+            font-weight: 700;
             text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .course-description {
-            color: #94a3b8;
+            color: var(--text-secondary);
             font-size: 14px;
-            line-height: 1.6;
-            margin-bottom: 15px;
+            line-height: 1.7;
+            margin-bottom: 20px;
+            min-height: 60px;
         }
 
         .course-footer {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding-top: 15px;
+            padding-top: 20px;
             border-top: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .course-price {
-            color: #ffb733;
+            color: var(--accent-color);
             font-size: 24px;
             font-weight: 700;
             font-family: 'Poppins', sans-serif;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .course-price i {
+            font-size: 20px;
         }
 
         .btn {
-            display: inline-block;
-            padding: 10px 20px;
-            background: linear-gradient(135deg, #00b348 0%, #007A33 100%);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, var(--header-color) 0%, #007A33 100%);
             color: white;
             text-decoration: none;
             border: none;
-            border-radius: 8px;
+            border-radius: 10px;
             font-size: 14px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: var(--transition);
+            box-shadow: 0 4px 15px rgba(0, 179, 72, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, transparent 100%);
+            opacity: 0;
+            transition: var(--transition);
         }
 
         .btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(0, 179, 72, 0.3);
+            box-shadow: 0 8px 25px rgba(0, 179, 72, 0.4);
+        }
+
+        .btn:hover::before {
+            opacity: 1;
         }
 
         .btn-secondary {
-            background: linear-gradient(135deg, #ffb733 0%, #f59e0b 100%);
+            background: linear-gradient(135deg, var(--accent-color) 0%, #f59e0b 100%);
+            box-shadow: 0 4px 15px rgba(251, 191, 36, 0.3);
+        }
+
+        .btn-secondary:hover {
+            box-shadow: 0 8px 25px rgba(251, 191, 36, 0.4);
         }
 
         .btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
+            background: rgba(100, 100, 100, 0.5);
+            box-shadow: none;
         }
 
-        .lock-icon {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 64px;
-            color: rgba(255, 255, 255, 0.8);
-            z-index: 2;
+        .btn:disabled:hover {
+            transform: none;
+            box-shadow: none;
         }
 
         .alert {
-            padding: 14px 18px;
+            padding: 16px 20px;
             border-radius: 12px;
             margin-bottom: 24px;
-            font-size: 14px;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
+            font-size: 14px;
+            font-weight: 500;
+            backdrop-filter: blur(10px);
+        }
+
+        .alert i {
+            font-size: 18px;
         }
 
         .alert-error {
-            background: rgba(239, 68, 68, 0.2);
-            border: 1px solid #ef4444;
-            color: #ef4444;
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
         }
 
         .alert-success {
-            background: rgba(0, 179, 72, 0.2);
-            border: 1px solid #00b348;
-            color: #00b348;
+            background: rgba(0, 179, 72, 0.15);
+            border: 1px solid rgba(0, 179, 72, 0.3);
+            color: #86efac;
+        }
+
+        @media (max-width: 1024px) {
+            .navbar .container {
+                padding: 0 24px;
+            }
+            
+            .container {
+                padding: 32px 24px;
+            }
         }
 
         @media (max-width: 768px) {
             .navbar .container {
+                height: auto;
                 flex-direction: column;
+                padding: 16px;
+                gap: 16px;
+            }
+
+            .navbar .nav-menu {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .navbar .user-info {
+                order: -1;
+                width: 100%;
+                justify-content: center;
             }
 
             .page-header h1 {
@@ -279,13 +501,13 @@
     <nav class="navbar">
         <div class="container">
             <a href="<?php echo BASE_PATH; ?>/dashboard" class="logo">
-                <?php echo APP_NAME; ?>
+                 Área Dev
             </a>
             <ul class="nav-menu">
                 <li><a href="<?php echo BASE_PATH; ?>/dashboard"><i class="fas fa-home"></i> Dashboard</a></li>
                 <li><a href="<?php echo BASE_PATH; ?>/cursos"><i class="fas fa-book"></i> Cursos</a></li>
                 <li><a href="<?php echo BASE_PATH; ?>/meus-cursos"><i class="fas fa-graduation-cap"></i> Meus Cursos</a></li>
-                <li><a href="<?php echo BASE_PATH; ?>/atividades"><i class="fas fa-tasks"></i> Atividades</a></li>
+                
                 <li class="user-info">
                     <span><i class="fas fa-user-circle"></i> <?php echo ucfirst($_SESSION['usuario_nivel']); ?></span>
                     <span><i class="fas fa-coins"></i> <?php echo $_SESSION['usuario_coins']; ?></span>
@@ -348,7 +570,10 @@
                         </p>
 
                         <div class="course-footer">
-                            <span class="course-price"><?php echo $curso['preco_coins']; ?> <i class="fas fa-coins"></i></span>
+                            <span class="course-price">
+                                <?php echo $curso['preco_coins']; ?>
+                                <i class="fas fa-coins"></i>
+                            </span>
 
                             <?php if ($bloqueado): ?>
                                 <button class="btn" disabled>
