@@ -18,27 +18,40 @@ class Curso {
         $this->conn = Database::getInstance()->getConnection();
     }
     
+    public function criar() {
+        $query = "INSERT INTO " . $this->table . " 
+                  (titulo, descricao, imagem_capa, nivel_requerido, preco_coins, ativo) 
+                  VALUES (:titulo, :descricao, :imagem_capa, :nivel_requerido, :preco_coins, :ativo)";
+        
+        $stmt = $this->conn->prepare($query);
+        
+        $stmt->bindParam(':titulo', $this->titulo);
+        $stmt->bindParam(':descricao', $this->descricao);
+        $stmt->bindParam(':imagem_capa', $this->imagem_capa);
+        $stmt->bindParam(':nivel_requerido', $this->nivel_requerido);
+        $stmt->bindParam(':preco_coins', $this->preco_coins);
+        $stmt->bindParam(':ativo', $this->ativo);
+        
+        return $stmt->execute();
+    }
+    
     public function listarTodos($nivel_usuario = null) {
-        $query = "SELECT * FROM " . $this->table . " WHERE ativo = 1";
-        
-        if ($nivel_usuario) {
-            $niveis = ['iniciante' => 1, 'intermediario' => 2, 'avancado' => 3, 'premium' => 4];
-            $nivel_num = $niveis[$nivel_usuario] ?? 1;
-            
-            $query .= " AND (
-                (nivel_requerido = 'iniciante' AND $nivel_num >= 1) OR
-                (nivel_requerido = 'intermediario' AND $nivel_num >= 2) OR
-                (nivel_requerido = 'avancado' AND $nivel_num >= 3) OR
-                (nivel_requerido = 'premium' AND $nivel_num >= 4)
-            )";
-        }
-        
-        $query .= " ORDER BY data_criacao DESC";
+        // Mostra todos os cursos ativos, independente do nível
+        // O controle de acesso será feito na view ou ao tentar comprar
+        $query = "SELECT * FROM " . $this->table . " WHERE ativo = 1 ORDER BY data_criacao DESC";
         
         $stmt = $this->conn->prepare($query);
         $stmt->execute();
         
         return $stmt->fetchAll();
+    }
+    
+    public function verificarAcessoNivel($nivel_usuario, $nivel_requerido) {
+        $niveis = ['iniciante' => 1, 'intermediario' => 2, 'avancado' => 3, 'premium' => 4];
+        $nivel_usuario_num = $niveis[$nivel_usuario] ?? 1;
+        $nivel_requerido_num = $niveis[$nivel_requerido] ?? 1;
+        
+        return $nivel_usuario_num >= $nivel_requerido_num;
     }
     
     public function buscarPorId($id) {
@@ -75,8 +88,6 @@ class Curso {
     }
     
     public function comprarCurso($usuario_id, $curso_id, $preco_coins) {
-        $this->conn->beginTransaction();
-        
         try {
             $query = "INSERT INTO compras_cursos (usuario_id, curso_id, preco_pago_coins) 
                       VALUES (:usuario_id, :curso_id, :preco_coins)";
@@ -85,21 +96,10 @@ class Curso {
             $stmt->bindParam(':usuario_id', $usuario_id);
             $stmt->bindParam(':curso_id', $curso_id);
             $stmt->bindParam(':preco_coins', $preco_coins);
-            $stmt->execute();
             
-            $query = "INSERT INTO progresso_usuarios (usuario_id, curso_id) 
-                      VALUES (:usuario_id, :curso_id)";
-            
-            $stmt = $this->conn->prepare($query);
-            $stmt->bindParam(':usuario_id', $usuario_id);
-            $stmt->bindParam(':curso_id', $curso_id);
-            $stmt->execute();
-            
-            $this->conn->commit();
-            return true;
+            return $stmt->execute();
             
         } catch (Exception $e) {
-            $this->conn->rollBack();
             return false;
         }
     }

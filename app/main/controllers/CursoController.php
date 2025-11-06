@@ -55,6 +55,13 @@ class CursoController {
             exit;
         }
         
+        // Verifica se o usuário tem nível suficiente para o curso
+        if (!$cursoModel->verificarAcessoNivel($_SESSION['usuario_nivel'], $curso['nivel_requerido'])) {
+            $_SESSION['erro'] = 'Você não tem nível suficiente para este curso! Você precisa ser nível ' . ucfirst($curso['nivel_requerido']) . ' ou superior.';
+            header('Location: ' . BASE_PATH . '/curso/' . $id);
+            exit;
+        }
+        
         if ($cursoModel->verificarAcesso($_SESSION['usuario_id'], $id)) {
             $_SESSION['erro'] = 'Você já possui este curso!';
             header('Location: ' . BASE_PATH . '/curso/' . $id);

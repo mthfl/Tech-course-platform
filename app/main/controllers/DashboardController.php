@@ -15,6 +15,10 @@ class DashboardController {
         $cursoModel = new Curso();
         $cursos_comprados = $cursoModel->buscarCursosComprados($_SESSION['usuario_id']);
         
+        require_once __DIR__ . '/../models/Atividade.php';
+        $atividadeModel = new Atividade();
+        $atividades = $atividadeModel->buscarAtividadesDoUsuario($_SESSION['usuario_id']);
+        
         $stats = [
             'total' => count($cursos_comprados)
         ];

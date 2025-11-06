@@ -17,6 +17,10 @@ class Atividade {
         $this->conn = Database::getInstance()->getConnection();
     }
     
+    public function getConnection() {
+        return $this->conn;
+    }
+    
     public function buscarPorModulo($modulo_id) {
         $query = "SELECT * FROM " . $this->table . " 
                   WHERE modulo_id = :modulo_id AND ativo = 1 
@@ -40,76 +44,132 @@ class Atividade {
     }
     
     public function buscarQuestoes($atividade_id) {
-        $query = "SELECT * FROM questoes WHERE atividade_id = :atividade_id ORDER BY ordem ASC";
+        $query = "SELECT * FROM perguntas WHERE atividade_id = :atividade_id ORDER BY ordem ASC";
         
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':atividade_id', $atividade_id);
         $stmt->execute();
         
-        return $stmt->fetchAll();
+        $result = $stmt->fetchAll();
+        return $result !== false ? $result : [];
     }
     
-    public function buscarAlternativas($questao_id) {
-        $query = "SELECT * FROM alternativas WHERE questao_id = :questao_id ORDER BY ordem ASC";
+    public function buscarAlternativas($pergunta_id) {
+        $query = "SELECT * FROM opcoes_pergunta WHERE pergunta_id = :pergunta_id ORDER BY id ASC";
         
         $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(':questao_id', $questao_id);
+        $stmt->bindParam(':pergunta_id', $pergunta_id);
         $stmt->execute();
         
-        return $stmt->fetchAll();
+        $result = $stmt->fetchAll();
+        return $result !== false ? $result : [];
     }
     
-    public function verificarResposta($questao_id, $alternativa_id) {
-        $query = "SELECT correta FROM alternativas 
-                  WHERE id = :alternativa_id AND questao_id = :questao_id 
+    public function verificarResposta($pergunta_id, $opcao_id) {
+        $query = "SELECT correta FROM opcoes_pergunta 
+                  WHERE id = :opcao_id AND pergunta_id = :pergunta_id 
                   LIMIT 1";
         
         $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(':alternativa_id', $alternativa_id);
-        $stmt->bindParam(':questao_id', $questao_id);
+        $stmt->bindParam(':opcao_id', $opcao_id);
+        $stmt->bindParam(':pergunta_id', $pergunta_id);
         $stmt->execute();
         
         $result = $stmt->fetch();
-        return $result ? $result['correta'] : 0;
+        return $result ? (int)$result['correta'] : 0;
     }
     
-    public function salvarResposta($usuario_id, $atividade_id, $questao_id, $alternativa_id, $correta) {
-        $query = "INSERT INTO respostas_usuarios 
-                  (usuario_id, atividade_id, questao_id, alternativa_id, correta) 
-                  VALUES (:usuario_id, :atividade_id, :questao_id, :alternativa_id, :correta)";
+    public function salvarResposta($usuario_id, $atividade_id, $pergunta_id, $opcao_id = null, $correta = 0, $resposta_texto = null) {
+        // Verifica se já existe uma resposta para esta pergunta
+        $query = "SELECT id FROM respostas_usuarios 
+                  WHERE usuario_id = :usuario_id AND pergunta_id = :pergunta_id 
+                  LIMIT 1";
         
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':usuario_id', $usuario_id);
-        $stmt->bindParam(':atividade_id', $atividade_id);
-        $stmt->bindParam(':questao_id', $questao_id);
-        $stmt->bindParam(':alternativa_id', $alternativa_id);
-        $stmt->bindParam(':correta', $correta);
+        $stmt->bindParam(':pergunta_id', $pergunta_id);
+        $stmt->execute();
+        $existe = $stmt->fetch();
         
-        return $stmt->execute();
+        if ($existe) {
+            // Atualiza resposta existente
+            $query = "UPDATE respostas_usuarios 
+                      SET opcao_escolhida_id = :opcao_id, 
+                          resposta_texto = :resposta_texto, 
+                          pontuacao = :pontuacao,
+                          data_resposta = NOW()
+                      WHERE id = :id";
+            
+            $pontuacao = $correta ? 1.00 : 0.00;
+            
+            $stmt = $this->conn->prepare($query);
+            $stmt->bindParam(':opcao_id', $opcao_id);
+            $stmt->bindParam(':resposta_texto', $resposta_texto);
+            $stmt->bindParam(':pontuacao', $pontuacao);
+            $stmt->bindParam(':id', $existe['id']);
+            
+            return $stmt->execute();
+        } else {
+            // Insere nova resposta
+            $pontuacao = $correta ? 1.00 : 0.00;
+            
+            $query = "INSERT INTO respostas_usuarios 
+                      (usuario_id, pergunta_id, opcao_escolhida_id, resposta_texto, pontuacao) 
+                      VALUES (:usuario_id, :pergunta_id, :opcao_id, :resposta_texto, :pontuacao)";
+            
+            $stmt = $this->conn->prepare($query);
+            $stmt->bindParam(':usuario_id', $usuario_id);
+            $stmt->bindParam(':pergunta_id', $pergunta_id);
+            $stmt->bindParam(':opcao_id', $opcao_id);
+            $stmt->bindParam(':resposta_texto', $resposta_texto);
+            $stmt->bindParam(':pontuacao', $pontuacao);
+            
+            return $stmt->execute();
+        }
     }
     
     public function calcularNota($usuario_id, $atividade_id) {
-        $query = "SELECT COUNT(*) as total FROM questoes WHERE atividade_id = :atividade_id";
+        $query = "SELECT COUNT(*) as total FROM perguntas WHERE atividade_id = :atividade_id";
         
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':atividade_id', $atividade_id);
         $stmt->execute();
         $total = $stmt->fetch();
         
-        $query = "SELECT COUNT(*) as corretas FROM respostas_usuarios 
-                  WHERE usuario_id = :usuario_id AND atividade_id = :atividade_id AND correta = 1";
+        $query = "SELECT SUM(pontuacao) as total_pontos FROM respostas_usuarios 
+                  WHERE usuario_id = :usuario_id 
+                  AND pergunta_id IN (SELECT id FROM perguntas WHERE atividade_id = :atividade_id)";
         
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':usuario_id', $usuario_id);
         $stmt->bindParam(':atividade_id', $atividade_id);
         $stmt->execute();
-        $corretas = $stmt->fetch();
+        $pontos = $stmt->fetch();
         
-        if ($total['total'] > 0) {
-            return round(($corretas['corretas'] / $total['total']) * 100, 2);
+        if ($total['total'] > 0 && $pontos['total_pontos'] !== null) {
+            return round(($pontos['total_pontos'] / $total['total']) * 100, 2);
         }
         
         return 0;
+    }
+    
+    public function verificarRespostasUsuario($usuario_id, $atividade_id) {
+        $query = "SELECT pergunta_id, opcao_escolhida_id, resposta_texto, pontuacao 
+                  FROM respostas_usuarios 
+                  WHERE usuario_id = :usuario_id 
+                  AND pergunta_id IN (SELECT id FROM perguntas WHERE atividade_id = :atividade_id)";
+        
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':usuario_id', $usuario_id);
+        $stmt->bindParam(':atividade_id', $atividade_id);
+        $stmt->execute();
+        
+        $respostas = [];
+        while ($row = $stmt->fetch()) {
+            $respostas[$row['pergunta_id']] = $row;
+        }
+        
+        return $respostas;
     }
     
     public function buscarRecompensa($atividade_id) {
@@ -174,5 +234,24 @@ class Atividade {
             $this->conn->rollBack();
             return false;
         }
+    }
+    
+    public function buscarAtividadesDoUsuario($usuario_id) {
+        $query = "SELECT DISTINCT a.*, m.curso_id, c.titulo as curso_titulo
+                  FROM atividades a
+                  INNER JOIN modulos m ON a.modulo_id = m.id
+                  INNER JOIN cursos c ON m.curso_id = c.id
+                  INNER JOIN compras_cursos cc ON c.id = cc.curso_id
+                  WHERE cc.usuario_id = :usuario_id 
+                  AND a.ativo = 1
+                  ORDER BY a.ordem ASC
+                  LIMIT 10";
+        
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':usuario_id', $usuario_id);
+        $stmt->execute();
+        
+        $result = $stmt->fetchAll();
+        return $result ? $result : [];
     }
 }

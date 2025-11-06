@@ -2,7 +2,10 @@
 
 session_start();
 
-define('BASE_PATH', '/app/main');
+// Detecta automaticamente o caminho base baseado no diretório do script
+$script_path = str_replace($_SERVER['DOCUMENT_ROOT'], '', __DIR__);
+$script_path = str_replace('\\', '/', $script_path); // Normaliza para Unix-style
+define('BASE_PATH', $script_path);
 define('APP_NAME', 'Tech Course Platform');
 
 require_once __DIR__ . '/config/Database.php';
@@ -14,8 +17,11 @@ require_once __DIR__ . '/controllers/AtividadeController.php';
 
 $request_uri = $_SERVER['REQUEST_URI'];
 
+// Remove o caminho base da URI
 $path = str_replace(BASE_PATH, '', $request_uri);
+// Remove query string
 $path = strtok($path, '?');
+// Remove barras do início e fim
 $path = trim($path, '/');
 
 $segments = explode('/', $path);
@@ -94,6 +100,11 @@ switch ($route) {
         $controller->marcarAssistido();
         break;
         
+    case 'atividades':
+        $controller = new AtividadeController();
+        $controller->listar();
+        break;
+
     case 'atividade':
         if ($param) {
             $controller = new AtividadeController();

@@ -16,33 +16,76 @@ class Database {
     }
 
     private function connect_database() {
-        try {
-            $config = require(__DIR__ . '/../.env/config.php');
-
-            try {
-                $host = $config['local']['tech_course']['host'];
-                $database = $config['local']['tech_course']['banco'];
-                $user = $config['local']['tech_course']['user'];
-                $password = $config['local']['tech_course']['senha'];
-
-                $this->conn = new PDO('mysql:host=' . $host . ';dbname=' . $database . ';charset=utf8', $user, $password);
-                $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-                $this->conn->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
-            } catch (PDOException $e) {
-                $host = $config['hospedagem']['tech_course']['host'];
-                $database = $config['hospedagem']['tech_course']['banco'];
-                $user = $config['hospedagem']['tech_course']['user'];
-                $password = $config['hospedagem']['tech_course']['senha'];
-
-                $this->conn = new PDO('mysql:host=' . $host . ';dbname=' . $database . ';charset=utf8', $user, $password);
-                $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-                $this->conn->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
-            }
-        } catch (PDOException $e) {
-            error_log("Erro de conexão com banco: " . $e->getMessage());
-            $this->conn = null;
-            die("Erro ao conectar com o banco de dados. Verifique as configurações.");
+        $configFile = __DIR__ . '/../.env/config.php';
+        
+        if (!file_exists($configFile)) {
+            die('Arquivo de configuração não encontrado em: ' . $configFile);
         }
+        
+        $config = require($configFile);
+        
+        if (!is_array($config)) {
+            die('Arquivo de configuração inválido. Deve retornar um array.');
+        }
+        
+        // Tenta conectar primeiro com a configuração local
+        if (isset($config['local']['tech_course'])) {
+            $dbConfig = $config['local']['tech_course'];
+            
+            if (isset($dbConfig['host']) && isset($dbConfig['banco']) && 
+                isset($dbConfig['user']) && isset($dbConfig['senha'])) {
+                
+                try {
+                    $host = $dbConfig['host'];
+                    $database = $dbConfig['banco'];
+                    $user = $dbConfig['user'];
+                    $password = $dbConfig['senha'];
+
+                    $this->conn = new PDO(
+                        'mysql:host=' . $host . ';dbname=' . $database . ';charset=utf8', 
+                        $user, 
+                        $password
+                    );
+                    $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+                    $this->conn->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+                    return; // Conexão bem-sucedida
+                } catch (PDOException $e) {
+                    error_log("Erro ao conectar com banco local: " . $e->getMessage());
+                    // Continua para tentar a configuração de hospedagem
+                }
+            }
+        }
+        
+        // Se falhou, tenta com a configuração de hospedagem
+        if (isset($config['hospedagem']['tech_course'])) {
+            $dbConfig = $config['hospedagem']['tech_course'];
+            
+            if (isset($dbConfig['host']) && isset($dbConfig['banco']) && 
+                isset($dbConfig['user']) && isset($dbConfig['senha'])) {
+                
+                try {
+                    $host = $dbConfig['host'];
+                    $database = $dbConfig['banco'];
+                    $user = $dbConfig['user'];
+                    $password = $dbConfig['senha'];
+
+                    $this->conn = new PDO(
+                        'mysql:host=' . $host . ';dbname=' . $database . ';charset=utf8', 
+                        $user, 
+                        $password
+                    );
+                    $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+                    $this->conn->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+                    return; // Conexão bem-sucedida
+                } catch (PDOException $e) {
+                    error_log("Erro ao conectar com banco de hospedagem: " . $e->getMessage());
+                }
+            }
+        }
+        
+        // Se chegou aqui, não conseguiu conectar
+        $this->conn = null;
+        die("Erro ao conectar com o banco de dados. Verifique as configurações no arquivo: " . $configFile);
     }
 
     public function getConnection() {
