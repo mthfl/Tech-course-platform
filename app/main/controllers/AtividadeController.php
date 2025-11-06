@@ -20,72 +20,80 @@ class AtividadeController {
     }
     
     public function visualizar($id) {
+        header('Content-Type: application/json');
+
         $atividadeModel = new Atividade();
         $atividade = $atividadeModel->buscarPorId($id);
-        
+
         if (!$atividade) {
-            $_SESSION['erro'] = 'Atividade não encontrada!';
-            header('Location: ' . BASE_PATH . '/dashboard');
+            echo json_encode(['success' => false, 'message' => 'Atividade não encontrada!']);
             exit;
         }
-        
+
+        // Verificar acesso ao curso
+        require_once __DIR__ . '/../models/Curso.php';
+        $cursoModel = new Curso();
+
+        $query = "SELECT m.curso_id FROM modulos m
+                  INNER JOIN atividades a ON m.id = a.modulo_id
+                  WHERE a.id = :atividade_id LIMIT 1";
+        $stmt = $atividadeModel->getConnection()->prepare($query);
+        $stmt->bindParam(':atividade_id', $id);
+        $stmt->execute();
+        $modulo = $stmt->fetch();
+
+        $tem_acesso = false;
+        if ($modulo) {
+            $tem_acesso = $cursoModel->verificarAcesso($_SESSION['usuario_id'], $modulo['curso_id']);
+        }
+
+        if (!$tem_acesso) {
+            echo json_encode(['success' => false, 'message' => 'Você não tem acesso a esta atividade!']);
+            exit;
+        }
+
         // Buscar perguntas e opções
         $perguntas = $atividadeModel->buscarQuestoes($id);
         if (!$perguntas) {
             $perguntas = [];
         }
-        
+
         foreach ($perguntas as &$pergunta) {
             $pergunta['opcoes'] = $atividadeModel->buscarAlternativas($pergunta['id']);
             if (!$pergunta['opcoes']) {
                 $pergunta['opcoes'] = [];
             }
         }
-        
+
         // Buscar respostas já dadas pelo usuário
         $respostas_usuario = $atividadeModel->verificarRespostasUsuario($_SESSION['usuario_id'], $id);
         if (!$respostas_usuario) {
             $respostas_usuario = [];
         }
-        
+
         // Calcular nota atual
         $nota = $atividadeModel->calcularNota($_SESSION['usuario_id'], $id);
         if ($nota === null) {
             $nota = 0;
         }
-        
+
         // Buscar informações de recompensa
         $recompensa = $atividadeModel->buscarRecompensa($id);
         if (!$recompensa) {
             $recompensa = false;
         }
         $recompensa_recebida = $atividadeModel->verificarRecompensaRecebida($_SESSION['usuario_id'], $id);
-        
-        // Verificar acesso ao curso
-        require_once __DIR__ . '/../models/Curso.php';
-        $cursoModel = new Curso();
-        
-        // Buscar módulo para verificar acesso
-        $query = "SELECT m.curso_id FROM modulos m 
-                  INNER JOIN atividades a ON m.id = a.modulo_id 
-                  WHERE a.id = :atividade_id LIMIT 1";
-        $stmt = $atividadeModel->getConnection()->prepare($query);
-        $stmt->bindParam(':atividade_id', $id);
-        $stmt->execute();
-        $modulo = $stmt->fetch();
-        
-        $tem_acesso = false;
-        if ($modulo) {
-            $tem_acesso = $cursoModel->verificarAcesso($_SESSION['usuario_id'], $modulo['curso_id']);
-        }
-        
-        if (!$tem_acesso) {
-            $_SESSION['erro'] = 'Você não tem acesso a esta atividade. Adquira o curso primeiro!';
-            header('Location: ' . BASE_PATH . '/dashboard');
-            exit;
-        }
-        
-        require_once __DIR__ . '/../views/atividades/visualizar.php';
+
+        echo json_encode([
+            'success' => true,
+            'atividade' => $atividade,
+            'perguntas' => $perguntas,
+            'respostas_usuario' => $respostas_usuario,
+            'nota' => $nota,
+            'recompensa' => $recompensa,
+            'recompensa_recebida' => $recompensa_recebida
+        ]);
+        exit;
     }
     
     public function responder() {

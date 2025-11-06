@@ -14,8 +14,8 @@ class CursoController {
     
     public function index() {
         $cursoModel = new Curso();
-        $cursos = $cursoModel->listarTodos($_SESSION['usuario_nivel']);
-        
+        $cursos = $cursoModel->listarTodos($_SESSION['usuario_nivel'], $_SESSION['usuario_id']);
+
         require_once __DIR__ . '/../views/cursos/index.php';
     }
     

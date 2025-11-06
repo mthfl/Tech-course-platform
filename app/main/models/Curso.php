@@ -35,14 +35,24 @@ class Curso {
         return $stmt->execute();
     }
     
-    public function listarTodos($nivel_usuario = null) {
-        // Mostra todos os cursos ativos, independente do nível
-        // O controle de acesso será feito na view ou ao tentar comprar
-        $query = "SELECT * FROM " . $this->table . " WHERE ativo = 1 ORDER BY data_criacao DESC";
-        
-        $stmt = $this->conn->prepare($query);
+    public function listarTodos($nivel_usuario = null, $usuario_id = null) {
+        // Mostra todos os cursos ativos e, se fornecido, indica se o usuário já comprou cada curso
+        if ($usuario_id) {
+            $query = "SELECT c.*,
+                      CASE WHEN cc.id IS NOT NULL THEN 1 ELSE 0 END as comprado
+                      FROM " . $this->table . " c
+                      LEFT JOIN compras_cursos cc ON c.id = cc.curso_id AND cc.usuario_id = :usuario_id
+                      WHERE c.ativo = 1
+                      ORDER BY c.data_criacao DESC";
+
+            $stmt = $this->conn->prepare($query);
+            $stmt->bindParam(':usuario_id', $usuario_id);
+        } else {
+            $query = "SELECT *, 0 as comprado FROM " . $this->table . " WHERE ativo = 1 ORDER BY data_criacao DESC";
+            $stmt = $this->conn->prepare($query);
+        }
+
         $stmt->execute();
-        
         return $stmt->fetchAll();
     }
     
