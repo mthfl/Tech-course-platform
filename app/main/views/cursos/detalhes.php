@@ -709,6 +709,161 @@
             color: #86efac;
         }
 
+        /* Video Player Styles - Inline no módulo */
+        .video-item {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(30, 30, 30, 0.6);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        .video-item-header {
+            margin-bottom: 16px;
+        }
+
+        .video-item-header h4 {
+            color: #ffffff;
+            font-family: 'Poppins', sans-serif;
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .video-item-header h4 i {
+            color: var(--header-color);
+        }
+
+        .video-item-header p {
+            color: var(--text-secondary);
+            font-size: 14px;
+            line-height: 1.5;
+            margin: 0;
+        }
+
+        .video-container {
+            position: relative;
+            width: 100%;
+            padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+            height: 0;
+            overflow: hidden;
+            background: #000;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .video-actions {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .video-progress-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            background: rgba(0, 179, 72, 0.15);
+            border: 2px solid var(--header-color);
+            border-radius: 20px;
+            color: var(--header-color);
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .video-progress-badge.watched {
+            background: rgba(127, 176, 105, 0.2);
+            border-color: #7FB069;
+            color: #7FB069;
+        }
+
+        .btn-mark-watched {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, var(--header-color) 0%, #007A33 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 15px rgba(0, 179, 72, 0.3);
+        }
+
+        .btn-mark-watched:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 179, 72, 0.4);
+        }
+
+        .btn-mark-watched:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            background: rgba(0, 179, 72, 0.3);
+        }
+
+        .btn-mark-watched.watched {
+            background: linear-gradient(135deg, #7FB069 0%, #5a8f4a 100%);
+            box-shadow: 0 4px 15px rgba(127, 176, 105, 0.3);
+        }
+
+        .recompensa-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            background: rgba(255, 183, 51, 0.15);
+            border: 2px solid var(--accent-color);
+            border-radius: 20px;
+            color: var(--accent-color);
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .video-reward-notification {
+            margin-top: 12px;
+            padding: 12px 16px;
+            background: rgba(255, 183, 51, 0.1);
+            border: 1px solid var(--accent-color);
+            border-radius: 8px;
+            color: var(--accent-color);
+            font-size: 14px;
+            display: none;
+        }
+
+        .video-reward-notification.show {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
@@ -763,6 +918,24 @@
 
             .modules-section, .course-header, .progress-section {
                 padding: 24px;
+            }
+
+            .video-item {
+                padding: 16px;
+            }
+
+            .video-actions {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .btn-mark-watched {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .video-container {
+                margin-bottom: 16px;
             }
         }
     </style>
@@ -838,7 +1011,7 @@
                 <?php 
                 require_once __DIR__ . '/../../models/Video.php';
                 require_once __DIR__ . '/../../models/Atividade.php';
-                $videoModel = new Video();
+                $videoModelGlobal = new Video();
                 $atividadeModel = new Atividade();
                 ?>
                 <?php foreach ($modulos as $modulo): ?>
@@ -849,7 +1022,7 @@
                         </div>
                         <div class="module-content">
                             <?php
-                            $videos = $videoModel->buscarPorModulo($modulo['id']);
+                            $videos = $videoModelGlobal->buscarPorModulo($modulo['id']);
                             $atividades = $atividadeModel->buscarPorModulo($modulo['id']);
                             ?>
 
@@ -865,14 +1038,83 @@
                             <div id="videos-<?php echo $modulo['id']; ?>" class="tab-content active">
                                 <?php if (!empty($videos)): ?>
                                     <?php foreach ($videos as $video): ?>
-                                        <div class="content-item">
-                                            <span>
-                                                <div><i class="fas fa-play-circle"></i><?php echo htmlspecialchars($video['titulo']); ?></div>
-                                            </span>
+                                        <?php
+                                        // Verifica se o vídeo já foi assistido
+                                        $progresso_video = 0;
+                                        $recompensa_video = null;
+                                        $recompensa_recebida_video = false;
+                                        
+                                        if ($tem_acesso) {
+                                            $progresso_video = $videoModelGlobal->verificarSeAssistido($_SESSION['usuario_id'], $video['id']);
+                                            $recompensa_video = $videoModelGlobal->buscarRecompensa($video['id']);
+                                            $recompensa_recebida_video = $videoModelGlobal->verificarRecompensaRecebida($_SESSION['usuario_id'], $video['id']);
+                                        }
+                                        ?>
+                                        <div class="video-item" data-video-id="<?php echo $video['id']; ?>">
+                                            <div class="video-item-header">
+                                                <h4><i class="fas fa-video"></i><?php echo htmlspecialchars($video['titulo']); ?></h4>
+                                                <?php if ($video['descricao']): ?>
+                                                    <p><?php echo htmlspecialchars($video['descricao']); ?></p>
+                                                <?php endif; ?>
+                                            </div>
+                                            
                                             <?php if ($tem_acesso): ?>
-                                                <a href="<?php echo BASE_PATH; ?>/video/<?php echo $video['id']; ?>">Assistir</a>
+                                                <div class="video-container">
+                                                    <iframe 
+                                                        src="<?php echo htmlspecialchars($video['drive_embed_link']); ?>" 
+                                                        allow="autoplay; fullscreen" 
+                                                        allowfullscreen
+                                                        loading="lazy">
+                                                    </iframe>
+                                                </div>
+                                                
+                                                <div class="video-actions">
+                                                    <div>
+                                                        <?php if ($progresso_video >= 90): ?>
+                                                            <span class="video-progress-badge watched">
+                                                                <i class="fas fa-check-circle"></i> Vídeo Assistido
+                                                            </span>
+                                                        <?php elseif ($progresso_video > 0): ?>
+                                                            <span class="video-progress-badge">
+                                                                <i class="fas fa-clock"></i> Em Progresso (<?php echo round($progresso_video); ?>%)
+                                                            </span>
+                                                        <?php else: ?>
+                                                            <span class="video-progress-badge">
+                                                                <i class="fas fa-play-circle"></i> Não Assistido
+                                                            </span>
+                                                        <?php endif; ?>
+                                                        
+                                                        <?php if ($recompensa_recebida_video && $recompensa_video): ?>
+                                                            <div class="video-reward-notification show">
+                                                                <i class="fas fa-gift"></i> 
+                                                                <?php if ($recompensa_video['coins'] > 0): ?>
+                                                                    +<?php echo $recompensa_video['coins']; ?> coins
+                                                                <?php endif; ?>
+                                                                <?php if ($recompensa_video['xp'] > 0): ?>
+                                                                    <?php if ($recompensa_video['coins'] > 0): ?> • <?php endif; ?>
+                                                                    +<?php echo $recompensa_video['xp']; ?> XP
+                                                                <?php endif; ?>
+                                                            </div>
+                                                        <?php endif; ?>
+                                                    </div>
+                                                    
+                                                    <button 
+                                                        class="btn-mark-watched <?php echo $progresso_video >= 90 ? 'watched' : ''; ?>" 
+                                                        onclick="marcarVideoComoAssistido(<?php echo $video['id']; ?>)" 
+                                                        data-video-id="<?php echo $video['id']; ?>"
+                                                        <?php echo $progresso_video >= 90 ? 'disabled' : ''; ?>>
+                                                        <?php if ($progresso_video >= 90): ?>
+                                                            <i class="fas fa-check-circle"></i> Já Visualizado
+                                                        <?php else: ?>
+                                                            <i class="fas fa-check"></i> Marcar como Visualizado
+                                                        <?php endif; ?>
+                                                    </button>
+                                                </div>
                                             <?php else: ?>
-                                                <span style="color: #94a3b8;"><i class="fas fa-lock"></i> Bloqueado</span>
+                                                <div style="padding: 40px; text-align: center; background: rgba(30, 30, 30, 0.8); border-radius: 12px;">
+                                                    <i class="fas fa-lock" style="font-size: 48px; color: #94a3b8; margin-bottom: 16px;"></i>
+                                                    <p style="color: #94a3b8; font-size: 16px;">Este vídeo está bloqueado. Compre o curso para ter acesso.</p>
+                                                </div>
                                             <?php endif; ?>
                                         </div>
                                     <?php endforeach; ?>
@@ -892,7 +1134,26 @@
                                                 <small><?php echo ucfirst($atividade['tipo']); ?></small>
                                             </span>
                                             <?php if ($tem_acesso): ?>
-                                                <a href="#" onclick="openAtividadeModal(<?php echo $atividade['id']; ?>); return false;">Fazer Atividade</a>
+                                                <?php
+                                                // Verifica se já fez a atividade
+                                                $progresso_atividade = 0;
+                                                $ja_fez_atividade = false;
+                                                if (isset($atividadeModelGlobal)) {
+                                                    $respostas_atividade = $atividadeModelGlobal->verificarRespostasUsuario($_SESSION['usuario_id'], $atividade['id']);
+                                                    $ja_fez_atividade = !empty($respostas_atividade);
+                                                    if ($ja_fez_atividade) {
+                                                        $nota_atividade = $atividadeModelGlobal->calcularNota($_SESSION['usuario_id'], $atividade['id']);
+                                                        $progresso_atividade = $nota_atividade;
+                                                    }
+                                                }
+                                                ?>
+                                                <a href="#" onclick="openAtividadeModal(<?php echo $atividade['id']; ?>); return false;">
+                                                    <?php if ($ja_fez_atividade): ?>
+                                                        <i class="fas fa-redo"></i> Refazer Atividade
+                                                    <?php else: ?>
+                                                        <i class="fas fa-tasks"></i> Fazer Atividade
+                                                    <?php endif; ?>
+                                                </a>
                                             <?php else: ?>
                                                 <span style="color: #94a3b8;"><i class="fas fa-lock"></i> Bloqueado</span>
                                             <?php endif; ?>
@@ -925,6 +1186,7 @@
             </div>
         </div>
     </div>
+
 
     <script>
         function toggleModule(header) {
@@ -983,23 +1245,56 @@
                 html += '<p style="color: var(--text-secondary); margin-bottom: 20px;">' + data.atividade.descricao + '</p>';
             }
 
+            // Informações de tentativas e status
+            if (data.tentativas) {
+                const tentativas = data.tentativas;
+                if (!tentativas.pode_tentar) {
+                    if (tentativas.horas_restantes) {
+                        html += '<div class="result-badge error" style="background: rgba(239, 68, 68, 0.15); border-color: rgba(239, 68, 68, 0.3); color: #fca5a5;">';
+                        html += '<i class="fas fa-clock"></i> Você já utilizou todas as 3 tentativas. Tente novamente em ' + tentativas.horas_restantes + ' hora(s).';
+                        html += '</div>';
+                    } else if (data.nota >= 100) {
+                        html += '<div class="result-badge success" style="background: rgba(34, 197, 94, 0.15); border-color: rgba(34, 197, 94, 0.3); color: #86efac; margin-bottom: 15px;">';
+                        html += '<i class="fas fa-check-circle"></i> Você acertou todas as questões! Não é possível refazer esta atividade.';
+                        html += '</div>';
+                    } else {
+                        html += '<div class="result-badge error" style="background: rgba(239, 68, 68, 0.15); border-color: rgba(239, 68, 68, 0.3); color: #fca5a5;">';
+                        html += '<i class="fas fa-ban"></i> Não é possível refazer esta atividade.';
+                        html += '</div>';
+                    }
+                } else {
+                    if (data.ja_fez) {
+                        html += '<div class="result-badge" style="background: rgba(251, 191, 36, 0.15); border-color: rgba(251, 191, 36, 0.3); color: #fde047; margin-bottom: 15px;">';
+                        html += '<i class="fas fa-redo"></i> Refazendo atividade - Você só ganhará recompensa pelas questões que corrigir.';
+                        html += '</div>';
+                    }
+                    if (tentativas.tentativas_restantes > 0) {
+                        html += '<div class="result-badge" style="background: rgba(59, 130, 246, 0.15); border-color: rgba(59, 130, 246, 0.3); color: #93c5fd; margin-bottom: 15px;">';
+                        html += '<i class="fas fa-redo"></i> Tentativas restantes: ' + tentativas.tentativas_restantes + ' de 3';
+                        html += '</div>';
+                    }
+                }
+            }
+
             if (data.nota > 0) {
                 html += '<div class="result-badge success"><i class="fas fa-check-circle"></i> Nota: ' + data.nota + '%</div>';
             }
 
             if (data.perguntas && data.perguntas.length > 0) {
-                data.perguntas.forEach((pergunta, index) => {
+                data.perguntas.forEach((pergunta, perguntaIndex) => {
                     html += '<div class="question-card">';
-                    html += '<h3>' + (index + 1) + '. ' + pergunta.pergunta + '</h3>';
+                    html += '<h3>' + (perguntaIndex + 1) + '. ' + pergunta.pergunta + '</h3>';
 
                     if (pergunta.opcoes && pergunta.opcoes.length > 0) {
-                        pergunta.opcoes.forEach(opcao => {
-                            const isSelected = data.respostas_usuario.some(r => r.opcao_escolhida_id == opcao.id);
+                        pergunta.opcoes.forEach((opcao, opcaoIndex) => {
+                            // Verifica se esta opção foi selecionada pelo usuário
+                            const respostaUsuario = data.respostas_usuario[perguntaIndex];
+                            const isSelected = respostaUsuario && respostaUsuario.opcao_index == opcaoIndex;
                             const selectedClass = isSelected ? 'selected' : '';
 
-                            html += '<div class="option ' + selectedClass + '" onclick="selectOption(this, ' + pergunta.id + ', ' + opcao.id + ')">';
-                            html += '<input type="radio" name="pergunta_' + pergunta.id + '" value="' + opcao.id + '" ' + (isSelected ? 'checked' : '') + '>';
-                            html += '<span>' + opcao.texto_opcao + '</span>';
+                            html += '<div class="option ' + selectedClass + '" onclick="selectOption(this, ' + perguntaIndex + ', ' + opcaoIndex + ')">';
+                            html += '<input type="radio" name="pergunta_' + perguntaIndex + '" value="' + opcaoIndex + '" ' + (isSelected ? 'checked' : '') + '>';
+                            html += '<span>' + opcao.texto + '</span>';
                             html += '</div>';
                         });
                     }
@@ -1007,15 +1302,44 @@
                     html += '</div>';
                 });
 
-                html += '<button class="submit-btn" onclick="submitAtividade(' + data.atividade.id + ')"><i class="fas fa-paper-plane"></i> Enviar Respostas</button>';
+                // Botão de envio - desabilitado se bloqueado
+                const podeEnviar = data.tentativas && data.tentativas.pode_tentar !== false;
+                if (podeEnviar) {
+                    html += '<button class="submit-btn" onclick="confirmarEnvio(' + data.atividade.id + ', ' + (data.tentativas ? data.tentativas.tentativas_restantes : 3) + ')"><i class="fas fa-paper-plane"></i> Enviar Respostas</button>';
+                } else {
+                    html += '<button class="submit-btn" style="opacity: 0.5; cursor: not-allowed;" disabled><i class="fas fa-lock"></i> Bloqueado - Aguarde ' + (data.tentativas ? data.tentativas.horas_restantes : 6) + ' hora(s)</button>';
+                }
             } else {
                 html += '<p style="color: var(--text-secondary); text-align: center;"><i class="fas fa-info-circle"></i> Esta atividade ainda não possui perguntas cadastradas.</p>';
             }
 
             document.getElementById('modalBody').innerHTML = html;
         }
+        
+        function confirmarEnvio(atividadeId, tentativasRestantes) {
+            const radios = document.querySelectorAll('#modalBody input[type="radio"]:checked');
+            
+            if (radios.length === 0) {
+                alert('Por favor, responda pelo menos uma pergunta!');
+                return;
+            }
+            
+            // Modal de confirmação melhorado
+            const totalPerguntas = document.querySelectorAll('.question-card').length;
+            const respostasSelecionadas = radios.length;
+            
+            let mensagem = 'Confirme o envio das respostas:\n\n';
+            mensagem += '• Perguntas respondidas: ' + respostasSelecionadas + ' de ' + totalPerguntas + '\n';
+            mensagem += '• Tentativas restantes: ' + tentativasRestantes + ' de 3\n\n';
+            mensagem += 'Após 3 tentativas, você precisará aguardar 6 horas para tentar novamente.\n\n';
+            mensagem += 'Deseja realmente enviar?';
+            
+            if (confirm(mensagem)) {
+                submitAtividade(atividadeId);
+            }
+        }
 
-        function selectOption(element, perguntaId, opcaoId) {
+        function selectOption(element, perguntaIndex, opcaoIndex) {
             const questionCard = element.closest('.question-card');
             questionCard.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
             element.classList.add('selected');
@@ -1032,10 +1356,11 @@
 
             const respostas = [];
             radios.forEach(radio => {
-                const perguntaId = radio.name.replace('pergunta_', '');
+                const perguntaIndex = parseInt(radio.name.replace('pergunta_', ''));
+                const opcaoIndex = parseInt(radio.value);
                 respostas.push({
-                    pergunta_id: perguntaId,
-                    opcao_id: radio.value
+                    pergunta_index: perguntaIndex,
+                    opcao_index: opcaoIndex
                 });
             });
 
@@ -1052,10 +1377,38 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
+                    // Recarrega o modal com as informações atualizadas
                     openAtividadeModal(atividadeId);
-                    alert('Respostas enviadas com sucesso!');
+                    
+                    // Mensagem de sucesso melhorada
+                    let mensagem = '✓ Respostas enviadas com sucesso!\n\n';
+                    mensagem += '• Nota: ' + (data.nota || 0) + '%\n';
+                    if (data.tentativas) {
+                        mensagem += '• Tentativas restantes: ' + data.tentativas.tentativas_restantes + ' de 3\n';
+                    }
+                    if (data.recompensa_recebida && data.recompensa) {
+                        if (data.recompensa.questoes_corrigidas !== undefined) {
+                            // Recompensa proporcional (refazendo)
+                            mensagem += '• Questões corrigidas: ' + data.recompensa.questoes_corrigidas + ' de ' + data.recompensa.total_perguntas + '\n';
+                            mensagem += '• Recompensa proporcional: +' + data.recompensa.coins + ' coins e +' + data.recompensa.xp + ' XP\n';
+                        } else {
+                            // Recompensa completa (primeira vez)
+                            mensagem += '• Recompensa: +' + data.recompensa.coins + ' coins e +' + data.recompensa.xp + ' XP\n';
+                        }
+                    }
+                    
+                    alert(mensagem);
                 } else {
-                    alert(data.message || 'Erro ao enviar respostas.');
+                    if (data.bloqueado) {
+                        let mensagem = '⚠ ' + data.message + '\n\n';
+                        if (data.tentativas && data.tentativas.bloqueado_ate) {
+                            const bloqueadoAte = new Date(data.tentativas.bloqueado_ate);
+                            mensagem += 'Você poderá tentar novamente em: ' + bloqueadoAte.toLocaleString('pt-BR');
+                        }
+                        alert(mensagem);
+                    } else {
+                        alert('❌ ' + (data.message || 'Erro ao enviar respostas.'));
+                    }
                 }
             })
             .catch(() => {
@@ -1071,6 +1424,141 @@
                 }
             });
             window._atividadeModalClickHandlerAttached = true;
+        }
+
+        // Função para marcar vídeo como assistido
+        function marcarVideoComoAssistido(videoId) {
+            const videoItem = document.querySelector(`.video-item[data-video-id="${videoId}"]`);
+            const button = videoItem.querySelector('.btn-mark-watched');
+            
+            // Desabilita o botão durante o processamento
+            button.disabled = true;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processando...';
+            
+            fetch('<?php echo BASE_PATH; ?>/marcar-video-assistido', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    video_id: videoId,
+                    progresso: 100
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Atualiza o badge de progresso
+                    const progressBadge = videoItem.querySelector('.video-progress-badge');
+                    progressBadge.className = 'video-progress-badge watched';
+                    progressBadge.innerHTML = '<i class="fas fa-check-circle"></i> Vídeo Assistido';
+                    
+                    // Atualiza o botão
+                    button.className = 'btn-mark-watched watched';
+                    button.disabled = true;
+                    button.innerHTML = '<i class="fas fa-check-circle"></i> Já Visualizado';
+                    
+                    // Atualiza os valores na navbar se houver recompensa
+                    if (data.recompensa && data.novo_saldo_coins !== undefined) {
+                        const userInfoSpans = document.querySelectorAll('.user-info span');
+                        userInfoSpans.forEach(span => {
+                            if (span.querySelector('.fa-coins')) {
+                                span.innerHTML = '<i class="fas fa-coins"></i> ' + data.novo_saldo_coins;
+                            }
+                            if (span.querySelector('.fa-star') && data.novo_xp !== undefined) {
+                                span.innerHTML = '<i class="fas fa-star"></i> ' + data.novo_xp + ' XP';
+                            }
+                        });
+                        
+                        // Mostra notificação de recompensa no vídeo
+                        if (data.recompensa.coins > 0 || data.recompensa.xp > 0) {
+                            showVideoRewardNotification(videoItem, data.recompensa);
+                            showRewardNotification(data.recompensa);
+                        }
+                    }
+                } else {
+                    // Reabilita o botão em caso de erro
+                    button.disabled = false;
+                    button.innerHTML = '<i class="fas fa-check"></i> Marcar como Visualizado';
+                    alert(data.message || 'Erro ao marcar vídeo como assistido.');
+                }
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                // Reabilita o botão em caso de erro
+                button.disabled = false;
+                button.innerHTML = '<i class="fas fa-check"></i> Marcar como Visualizado';
+                alert('Erro ao processar. Tente novamente.');
+            });
+        }
+
+        function showVideoRewardNotification(videoItem, recompensa) {
+            // Remove notificação anterior se existir
+            const existingNotification = videoItem.querySelector('.video-reward-notification');
+            if (existingNotification) {
+                existingNotification.remove();
+            }
+            
+            // Cria nova notificação
+            const notification = document.createElement('div');
+            notification.className = 'video-reward-notification show';
+            
+            let message = '<i class="fas fa-gift"></i> Recompensa recebida: ';
+            if (recompensa.coins > 0) {
+                message += '+' + recompensa.coins + ' coins';
+            }
+            if (recompensa.xp > 0) {
+                if (recompensa.coins > 0) {
+                    message += ' • ';
+                }
+                message += '+' + recompensa.xp + ' XP';
+            }
+            
+            notification.innerHTML = message;
+            
+            // Insere a notificação antes do botão
+            const actionsDiv = videoItem.querySelector('.video-actions');
+            const firstChild = actionsDiv.querySelector('div');
+            firstChild.appendChild(notification);
+            
+            // Remove a notificação após 5 segundos
+            setTimeout(function() {
+                notification.style.opacity = '0';
+                notification.style.transition = 'opacity 0.5s';
+                setTimeout(function() {
+                    notification.remove();
+                }, 500);
+            }, 5000);
+        }
+
+        function showRewardNotification(recompensa) {
+            let message = 'Recompensa recebida: ';
+            if (recompensa.coins > 0) {
+                message += '+' + recompensa.coins + ' coins ';
+            }
+            if (recompensa.xp > 0) {
+                message += '+' + recompensa.xp + ' XP';
+            }
+
+            // Cria um alerta temporário no topo da página
+            const alert = document.createElement('div');
+            alert.className = 'alert alert-success';
+            alert.style.position = 'fixed';
+            alert.style.top = '80px';
+            alert.style.right = '20px';
+            alert.style.zIndex = '10000';
+            alert.style.minWidth = '300px';
+            alert.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.3)';
+            alert.innerHTML = '<i class="fas fa-check-circle"></i> ' + message;
+            document.body.appendChild(alert);
+
+            setTimeout(function() {
+                alert.style.opacity = '0';
+                alert.style.transition = 'opacity 0.5s';
+                setTimeout(function() {
+                    alert.remove();
+                }, 500);
+            }, 4000);
         }
     </script>
 </body>

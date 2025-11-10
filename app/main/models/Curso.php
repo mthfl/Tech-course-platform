@@ -18,6 +18,10 @@ class Curso {
         $this->conn = Database::getInstance()->getConnection();
     }
     
+    public function getConnection() {
+        return $this->conn;
+    }
+    
     public function criar() {
         $query = "INSERT INTO " . $this->table . " 
                   (titulo, descricao, imagem_capa, nivel_requerido, preco_coins, ativo) 
@@ -129,6 +133,7 @@ class Curso {
     }
     
     public function calcularProgresso($usuario_id, $curso_id) {
+        // Conta total de vídeos
         $query = "SELECT COUNT(DISTINCT v.id) as total_videos
                   FROM videos v
                   INNER JOIN modulos m ON v.modulo_id = m.id
@@ -137,8 +142,9 @@ class Curso {
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':curso_id', $curso_id);
         $stmt->execute();
-        $total = $stmt->fetch();
+        $total_videos = $stmt->fetch();
         
+        // Conta vídeos assistidos
         $query = "SELECT COUNT(DISTINCT va.video_id) as videos_assistidos
                   FROM videos_assistidos va
                   INNER JOIN videos v ON va.video_id = v.id
@@ -150,12 +156,236 @@ class Curso {
         $stmt->bindParam(':curso_id', $curso_id);
         $stmt->bindParam(':usuario_id', $usuario_id);
         $stmt->execute();
-        $assistidos = $stmt->fetch();
+        $videos_assistidos = $stmt->fetch();
         
-        if ($total['total_videos'] > 0) {
-            return round(($assistidos['videos_assistidos'] / $total['total_videos']) * 100, 2);
+        // Conta total de atividades
+        $query = "SELECT COUNT(DISTINCT a.id) as total_atividades
+                  FROM atividades a
+                  INNER JOIN modulos m ON a.modulo_id = m.id
+                  WHERE m.curso_id = :curso_id AND a.ativo = 1";
+        
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':curso_id', $curso_id);
+        $stmt->execute();
+        $total_atividades = $stmt->fetch();
+        
+        // Conta atividades concluídas (com resposta salva)
+        // Uma atividade é considerada concluída se tem resposta salva na tabela respostas_usuarios
+        $query = "SELECT COUNT(DISTINCT ru.atividade_id) as atividades_concluidas
+                  FROM respostas_usuarios ru
+                  INNER JOIN atividades a ON ru.atividade_id = a.id
+                  INNER JOIN modulos m ON a.modulo_id = m.id
+                  WHERE m.curso_id = :curso_id 
+                  AND ru.usuario_id = :usuario_id
+                  AND a.ativo = 1";
+        
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':curso_id', $curso_id);
+        $stmt->bindParam(':usuario_id', $usuario_id);
+        $stmt->execute();
+        $atividades_concluidas = $stmt->fetch();
+        
+        // Calcula progresso total
+        $total_itens = ($total_videos['total_videos'] ?? 0) + ($total_atividades['total_atividades'] ?? 0);
+        $itens_concluidos = ($videos_assistidos['videos_assistidos'] ?? 0) + ($atividades_concluidas['atividades_concluidas'] ?? 0);
+        
+        if ($total_itens > 0) {
+            return round(($itens_concluidos / $total_itens) * 100, 2);
         }
         
         return 0;
+    }
+    
+    public function verificarCursoConcluido($usuario_id, $curso_id) {
+        $progresso = $this->calcularProgresso($usuario_id, $curso_id);
+        return $progresso >= 100;
+    }
+    
+    public function verificarCursoAnteriorConcluido($usuario_id, $curso_id_atual) {
+        // Busca o curso atual para obter seu nível
+        $curso_atual = $this->buscarPorId($curso_id_atual);
+        if (!$curso_atual) {
+            return true; // Se não encontrar, permite por segurança
+        }
+        
+        // Ordena cursos por nível (iniciante primeiro) e depois por ID
+        // Níveis: iniciante=1, intermediario=2, avancado=3
+        $niveis = ['iniciante' => 1, 'intermediario' => 2, 'avancado' => 3];
+        
+        // Busca todos os cursos ordenados por nível e ID
+        $query = "SELECT id, nivel_requerido FROM " . $this->table . " 
+                  WHERE ativo = 1 
+                  ORDER BY 
+                    CASE nivel_requerido 
+                      WHEN 'iniciante' THEN 1 
+                      WHEN 'intermediario' THEN 2 
+                      WHEN 'avancado' THEN 3 
+                      ELSE 4 
+                    END ASC, 
+                    id ASC";
+        
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
+        $todos_cursos = $stmt->fetchAll();
+        
+        // Encontra a posição do curso atual na ordem
+        $posicao_atual = -1;
+        foreach ($todos_cursos as $index => $curso) {
+            if ($curso['id'] == $curso_id_atual) {
+                $posicao_atual = $index;
+                break;
+            }
+        }
+        
+        // Se é o primeiro curso na ordem (índice 0), sempre permite
+        if ($posicao_atual === 0) {
+            return true;
+        }
+        
+        // Se não encontrou o curso ou está em posição inválida, permite por segurança
+        if ($posicao_atual < 0) {
+            return true;
+        }
+        
+        // Busca o curso anterior na ordem
+        $curso_anterior_id = $todos_cursos[$posicao_atual - 1]['id'];
+        
+        // Verifica se tem acesso ao curso anterior
+        $tem_acesso = $this->verificarAcesso($usuario_id, $curso_anterior_id);
+        
+        if (!$tem_acesso) {
+            // Não comprou o curso anterior - precisa comprar primeiro
+            return false;
+        }
+        
+        // Verifica se concluiu 100% do curso anterior
+        $concluido = $this->verificarCursoConcluido($usuario_id, $curso_anterior_id);
+        
+        return $concluido;
+    }
+    
+    public function buscarCursoAnterior($curso_id_atual) {
+        // Ordena cursos por nível (iniciante primeiro) e depois por ID
+        $query = "SELECT id, titulo, nivel_requerido FROM " . $this->table . " 
+                  WHERE ativo = 1 
+                  ORDER BY 
+                    CASE nivel_requerido 
+                      WHEN 'iniciante' THEN 1 
+                      WHEN 'intermediario' THEN 2 
+                      WHEN 'avancado' THEN 3 
+                      ELSE 4 
+                    END ASC, 
+                    id ASC";
+        
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
+        $todos_cursos = $stmt->fetchAll();
+        
+        // Encontra a posição do curso atual
+        $posicao_atual = -1;
+        foreach ($todos_cursos as $index => $curso) {
+            if ($curso['id'] == $curso_id_atual) {
+                $posicao_atual = $index;
+                break;
+            }
+        }
+        
+        // Se é o primeiro curso, não há curso anterior
+        if ($posicao_atual <= 0) {
+            return null;
+        }
+        
+        // Retorna o curso anterior
+        return $todos_cursos[$posicao_atual - 1];
+    }
+    
+    public function concederRecompensaConclusao($usuario_id, $curso_id) {
+        // Verifica se já recebeu a recompensa
+        $query = "SELECT id FROM transacoes 
+                  WHERE usuario_id = :usuario_id 
+                  AND tipo_referencia = 'curso' 
+                  AND referencia_id = :curso_id
+                  AND descricao LIKE '%Conclusão do curso%'
+                  LIMIT 1";
+        
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':usuario_id', $usuario_id);
+        $stmt->bindParam(':curso_id', $curso_id);
+        $stmt->execute();
+        
+        if ($stmt->rowCount() > 0) {
+            // Já recebeu a recompensa
+            return false;
+        }
+        
+        // Define recompensa por curso
+        $recompensas = [
+            1 => ['coins' => 10, 'xp' => 100],  // Curso 1
+            2 => ['coins' => 10, 'xp' => 100],  // Curso 2
+            3 => ['coins' => 20, 'xp' => 200],  // Curso 3
+            4 => ['coins' => 10, 'xp' => 100]   // Curso 4
+        ];
+        
+        if (!isset($recompensas[$curso_id])) {
+            return false;
+        }
+        
+        $recompensa = $recompensas[$curso_id];
+        $this->conn->beginTransaction();
+        
+        try {
+            // Adiciona coins
+            if ($recompensa['coins'] > 0) {
+                $query = "INSERT INTO transacoes 
+                          (usuario_id, tipo, operacao, quantidade, descricao, referencia_id, tipo_referencia) 
+                          VALUES (:usuario_id, 'coins', 'entrada', :quantidade, 'Bônus por conclusão do curso', :curso_id, 'curso')";
+                
+                $stmt = $this->conn->prepare($query);
+                $stmt->bindParam(':usuario_id', $usuario_id);
+                $stmt->bindParam(':quantidade', $recompensa['coins']);
+                $stmt->bindParam(':curso_id', $curso_id);
+                $stmt->execute();
+                
+                // Atualiza saldo do usuário
+                $query = "UPDATE usuarios SET coins = coins + :coins WHERE id = :id";
+                $stmt = $this->conn->prepare($query);
+                $stmt->bindParam(':coins', $recompensa['coins']);
+                $stmt->bindParam(':id', $usuario_id);
+                $stmt->execute();
+            }
+            
+            // Adiciona XP
+            if ($recompensa['xp'] > 0) {
+                $query = "INSERT INTO transacoes 
+                          (usuario_id, tipo, operacao, quantidade, descricao, referencia_id, tipo_referencia) 
+                          VALUES (:usuario_id, 'xp', 'entrada', :quantidade, 'Bônus por conclusão do curso', :curso_id, 'curso')";
+                
+                $stmt = $this->conn->prepare($query);
+                $stmt->bindParam(':usuario_id', $usuario_id);
+                $stmt->bindParam(':quantidade', $recompensa['xp']);
+                $stmt->bindParam(':curso_id', $curso_id);
+                $stmt->execute();
+                
+                // Atualiza XP do usuário
+                require_once __DIR__ . '/Usuario.php';
+                $usuarioModel = new Usuario();
+                $usuarioModel->adicionarXP($usuario_id, $recompensa['xp']);
+            }
+            
+            $this->conn->commit();
+            return $recompensa;
+            
+        } catch (Exception $e) {
+            $this->conn->rollBack();
+            return false;
+        }
+    }
+    
+    public function verificarEConceberRecompensaConclusao($usuario_id, $curso_id) {
+        // Verifica se o curso está 100% concluído
+        if ($this->verificarCursoConcluido($usuario_id, $curso_id)) {
+            return $this->concederRecompensaConclusao($usuario_id, $curso_id);
+        }
+        return false;
     }
 }

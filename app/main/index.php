@@ -95,6 +95,15 @@ switch ($route) {
         }
         break;
         
+    case 'video-info':
+        if ($param) {
+            $controller = new VideoController();
+            $controller->visualizar($param);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'ID do vídeo não fornecido']);
+        }
+        break;
+        
     case 'marcar-video-assistido':
         $controller = new VideoController();
         $controller->marcarAssistido();
