@@ -28,9 +28,8 @@ class Database {
             die('Arquivo de configuração inválido. Deve retornar um array.');
         }
         
-        // Tenta conectar primeiro com a configuração local
-        if (isset($config['local']['tech_course'])) {
-            $dbConfig = $config['local']['tech_course'];
+        if (isset($config['local']['curso_dev'])) {
+            $dbConfig = $config['local']['curso_dev'];
             
             if (isset($dbConfig['host']) && isset($dbConfig['banco']) && 
                 isset($dbConfig['user']) && isset($dbConfig['senha'])) {
@@ -48,17 +47,15 @@ class Database {
                     );
                     $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
                     $this->conn->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
-                    return; // Conexão bem-sucedida
+                    return;
                 } catch (PDOException $e) {
                     error_log("Erro ao conectar com banco local: " . $e->getMessage());
-                    // Continua para tentar a configuração de hospedagem
                 }
             }
         }
         
-        // Se falhou, tenta com a configuração de hospedagem
-        if (isset($config['hospedagem']['tech_course'])) {
-            $dbConfig = $config['hospedagem']['tech_course'];
+        if (isset($config['hospedagem']['curso_dev'])) {
+            $dbConfig = $config['hospedagem']['curso_dev'];
             
             if (isset($dbConfig['host']) && isset($dbConfig['banco']) && 
                 isset($dbConfig['user']) && isset($dbConfig['senha'])) {
@@ -76,14 +73,13 @@ class Database {
                     );
                     $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
                     $this->conn->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
-                    return; // Conexão bem-sucedida
+                    return;
                 } catch (PDOException $e) {
                     error_log("Erro ao conectar com banco de hospedagem: " . $e->getMessage());
                 }
             }
         }
         
-        // Se chegou aqui, não conseguiu conectar
         $this->conn = null;
         die("Erro ao conectar com o banco de dados. Verifique as configurações no arquivo: " . $configFile);
     }

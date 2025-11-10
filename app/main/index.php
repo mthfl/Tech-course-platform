@@ -2,10 +2,8 @@
 
 session_start();
 
-// Detecta automaticamente o caminho base baseado no diretório do script
-$script_path = str_replace($_SERVER['DOCUMENT_ROOT'], '', __DIR__);
-$script_path = str_replace('\\', '/', $script_path); // Normaliza para Unix-style
-define('BASE_PATH', $script_path);
+// Define o caminho base fixo
+define('BASE_PATH', '/Tech-course-platform/app/main');
 define('APP_NAME', 'Tech Course Platform');
 
 require_once __DIR__ . '/config/Database.php';

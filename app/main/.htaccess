@@ -1,7 +1,9 @@
-RewriteEngine On
-RewriteBase /Tech-course-platform/app/main/
-
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
-
-RewriteRule ^(.*)$ index.php [QSA,L]
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /Tech-course-platform/
+    
+    # Redireciona tudo para app/main/
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^(.*)$ app/main/index.php [L,QSA]
+</IfModule>
