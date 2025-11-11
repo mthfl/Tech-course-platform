@@ -2,8 +2,10 @@
 
 session_start();
 
-// Define o caminho base fixo
-define('BASE_PATH', '/Tech-course-platform/app/main');
+// Define o caminho base dinamicamente, compatível com local e hospedagem
+// Ex: '/Tech-course-platform/app/main' (local) ou '/app/main' (hospedagem)
+$basePath = rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'])), '/');
+define('BASE_PATH', $basePath === '/' ? '' : $basePath);
 define('APP_NAME', 'Tech Course Platform');
 
 require_once __DIR__ . '/config/Database.php';

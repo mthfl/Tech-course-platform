@@ -54,12 +54,15 @@ class Database {
             }
         }
         
-        if (isset($config['hospedagem']['curso_dev'])) {
-            $dbConfig = $config['hospedagem']['curso_dev'];
-            
-            if (isset($dbConfig['host']) && isset($dbConfig['banco']) && 
+        if (isset($config['hospedagem'])) {
+            // Suporta múltiplas chaves de projeto: 'curso_dev' (esperado) ou 'tech_course' (atual .env)
+            $dbConfig = $config['hospedagem']['curso_dev']
+                ?? $config['hospedagem']['tech_course']
+                ?? null;
+
+            if (is_array($dbConfig) && isset($dbConfig['host']) && isset($dbConfig['banco']) &&
                 isset($dbConfig['user']) && isset($dbConfig['senha'])) {
-                
+
                 try {
                     $host = $dbConfig['host'];
                     $database = $dbConfig['banco'];
@@ -67,8 +70,8 @@ class Database {
                     $password = $dbConfig['senha'];
 
                     $this->conn = new PDO(
-                        'mysql:host=' . $host . ';dbname=' . $database . ';charset=utf8', 
-                        $user, 
+                        'mysql:host=' . $host . ';dbname=' . $database . ';charset=utf8',
+                        $user,
                         $password
                     );
                     $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
