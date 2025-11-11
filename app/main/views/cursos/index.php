@@ -211,6 +211,10 @@
             transition: var(--transition);
             border: 1px solid var(--border-color);
             position: relative;
+            display: flex;
+            flex-direction: column;
+            /* altura consistente dos cards */
+            min-height: 420px;
         }
 
         .course-card::before {
@@ -326,6 +330,9 @@
 
         .course-body {
             padding: 20px;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
         }
 
         .course-header {
@@ -361,12 +368,16 @@
             font-size: 14px;
             line-height: 1.7;
             margin-bottom: 20px;
-            min-height: 60px;
+            /* Limita número de linhas para manter altura uniforme */
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
         }
 
         .course-footer {
             display: flex;
-            justify-content: space-between;
+            justify-content: flex-end;
             align-items: center;
             padding-top: 20px;
             border-top: 1px solid rgba(255, 255, 255, 0.1);
@@ -510,14 +521,181 @@
             }
         }
     </style>
+    <style>
+        /* Responsividade aprimorada */
+        .navbar .container {
+            padding: 0 clamp(16px, 3vw, 32px);
+            height: clamp(56px, 8vw, 72px);
+        }
+
+        .navbar .logo {
+            font-size: clamp(18px, 2.4vw, 22px);
+        }
+
+        .container {
+            padding: clamp(24px, 4vw, 40px) clamp(16px, 3vw, 32px);
+        }
+
+        .page-header h1 {
+            font-size: clamp(24px, 3.2vw, 36px);
+        }
+
+        .course-grid {
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: clamp(16px, 2.4vw, 24px);
+        }
+
+        .course-image {
+            height: auto !important;
+            aspect-ratio: 16/9;
+        }
+
+        .course-title {
+            font-size: clamp(17px, 2vw, 19px);
+        }
+
+        .course-description {
+            font-size: clamp(13px, 1.8vw, 14px);
+        }
+
+        .btn {
+            min-height: 44px;
+            touch-action: manipulation;
+        }
+
+        .alert {
+            font-size: clamp(13px, 1.8vw, 14px);
+        }
+
+        .navbar .nav-menu a {
+            padding: clamp(8px, 1.8vw, 10px) clamp(12px, 2.2vw, 18px);
+            font-size: clamp(13px, 1.9vw, 14px);
+        }
+
+        @media (max-width: 1280px) {
+            .container { padding: clamp(20px, 3.2vw, 32px) clamp(14px, 2.6vw, 28px); }
+            .course-grid { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+        }
+
+        @media (max-width: 992px) {
+            .navbar .container {
+                height: auto;
+                padding: 12px 24px;
+                gap: 12px;
+                flex-direction: column;
+            }
+            .navbar .nav-menu { flex-wrap: wrap; justify-content: center; }
+            .course-grid { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+        }
+
+        @media (max-width: 768px) {
+            .page-header h1 { font-size: clamp(22px, 6vw, 28px); }
+            .course-grid { grid-template-columns: 1fr; }
+            .btn { width: 100%; }
+            .course-card { min-height: 380px; }
+            .course-footer { flex-direction: column; align-items: stretch; gap: 12px; }
+        }
+
+        @media (max-width: 576px) {
+            .navbar .nav-menu {
+                gap: 6px;
+                overflow-x: auto;
+                padding-bottom: 6px;
+            }
+            .course-body { padding: 16px; }
+            .course-title { font-size: clamp(16px, 5.2vw, 19px); }
+            .course-description { font-size: clamp(13px, 4.2vw, 14px); }
+        }
+
+        .btn:focus-visible,
+        .navbar .nav-menu a:focus-visible {
+            outline: 2px solid var(--accent-color);
+            outline-offset: 2px;
+        }
+    </style>
 </head>
 <body>
+    <style>
+        /* Botão de menu (hambúrguer) ao lado do "Área Dev" */
+        .menu-toggle {
+            display: none;
+            background: rgba(0, 179, 72, 0.12);
+            border: 1px solid rgba(0, 179, 72, 0.3);
+            color: #ffffff;
+            padding: 10px 14px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            gap: 8px;
+        }
+        .menu-toggle i { color: var(--header-color); }
+
+        /* Agrupa logo + botão para ficarem lado a lado */
+        .navbar .brand-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* Overlay para fundo quando o menu lateral estiver aberto */
+        .sidebar-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+            z-index: 999;
+        }
+        .sidebar-overlay.active { opacity: 1; visibility: visible; }
+
+        @media (max-width: 992px) {
+            .menu-toggle { display: inline-flex; align-items: center; }
+            .navbar { position: sticky; }
+            .navbar .container { position: relative; gap: 12px; }
+
+            /* Menu vira uma lateral fixa (off-canvas) */
+            .navbar .nav-menu {
+                position: fixed;
+                top: 0;
+                left: 0;
+                height: 100vh;
+                width: min(85vw, 320px);
+                background: var(--sidebar-bg);
+                border-right: 1px solid var(--border-color);
+                padding: 80px 12px 16px; /* espaço para header */
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+                z-index: 1000;
+                box-shadow: var(--shadow-lg);
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+                overflow-y: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            body.menu-open .navbar .nav-menu { transform: translateX(0); }
+
+            .navbar .nav-menu a {
+                width: 100%;
+                padding: 12px 14px;
+                border-radius: 8px;
+            }
+            .navbar .user-info { width: 100%; justify-content: flex-start; margin: 8px 0; }
+        }
+    </style>
     <nav class="navbar">
         <div class="container">
-            <a href="<?php echo BASE_PATH; ?>/dashboard" class="logo">
-                 Área Dev
-            </a>
-            <ul class="nav-menu">
+            <div class="brand-group">
+                <a href="<?php echo BASE_PATH; ?>/dashboard" class="logo">
+                     Área Dev
+                </a>
+                <button class="menu-toggle" aria-label="Abrir menu" aria-expanded="false" aria-controls="primary-menu">
+                    <i class="fas fa-bars"></i>
+                    Menu
+                </button>
+            </div>
+            <ul class="nav-menu" id="primary-menu">
                 <li><a href="<?php echo BASE_PATH; ?>/dashboard"><i class="fas fa-home"></i> Dashboard</a></li>
                 <li><a href="<?php echo BASE_PATH; ?>/cursos"><i class="fas fa-book"></i> Cursos</a></li>
                 <li><a href="<?php echo BASE_PATH; ?>/meus-cursos"><i class="fas fa-graduation-cap"></i> Meus Cursos</a></li>
@@ -529,6 +707,7 @@
             </ul>
         </div>
     </nav>
+    <div class="sidebar-overlay" aria-hidden="true"></div>
 
     <div class="container">
         <?php if (isset($_SESSION['erro'])): ?>
@@ -586,11 +765,6 @@
                         </p>
 
                         <div class="course-footer">
-                            <span class="course-price">
-                                <?php echo $curso['nivel_requerido']; ?>
-                                <i class="fas fa-level-up-alt"></i>
-                            </span>
-
                             <?php if ($bloqueado): ?>
                                 <button class="btn" disabled>
                                     <i class="fas fa-lock"></i> Bloqueado
@@ -611,4 +785,33 @@
         </div>
     </div>
 </body>
+<script>
+  (function(){
+    const toggle = document.querySelector('.menu-toggle');
+    const menu = document.getElementById('primary-menu');
+    const overlay = document.querySelector('.sidebar-overlay');
+    if (!toggle || !menu || !overlay) return;
+
+    const closeMenu = () => {
+      document.body.classList.remove('menu-open');
+      overlay.classList.remove('active');
+      document.body.style.overflow = '';
+      toggle.setAttribute('aria-expanded','false');
+    };
+
+    toggle.addEventListener('click', () => {
+      const willOpen = !document.body.classList.contains('menu-open');
+      document.body.classList.toggle('menu-open');
+      overlay.classList.toggle('active');
+      document.body.style.overflow = willOpen ? 'hidden' : '';
+      toggle.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+    });
+
+    overlay.addEventListener('click', closeMenu);
+    menu.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
+      if (window.innerWidth <= 992) closeMenu();
+    }));
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeMenu(); });
+  })();
+</script>
 </html>

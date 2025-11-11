@@ -763,6 +763,7 @@
             width: 100%;
             height: 100%;
             border: none;
+            border-radius: inherit;
         }
 
         .video-actions {
@@ -1125,14 +1126,194 @@
             }
         }
     </style>
+    <style>
+        /* Responsividade aprimorada */
+        .navbar .container {
+            padding: 0 clamp(16px, 3vw, 32px);
+            height: clamp(56px, 8vw, 72px);
+        }
+
+        .navbar .logo {
+            font-size: clamp(18px, 2.4vw, 22px);
+        }
+
+        .container {
+            padding: clamp(24px, 4vw, 40px) clamp(16px, 3vw, 32px);
+        }
+
+        .course-header h1 {
+            font-size: clamp(26px, 3.5vw, 40px);
+        }
+
+        .course-description {
+            font-size: clamp(14px, 1.9vw, 16px);
+        }
+
+        .course-level, .course-price {
+            font-size: clamp(12px, 1.8vw, 13px);
+        }
+
+        .btn {
+            min-height: 44px;
+            touch-action: manipulation;
+        }
+
+        .progress-section h3 {
+            font-size: clamp(18px, 2.4vw, 20px);
+        }
+
+        .modules-section {
+            padding: clamp(24px, 3.8vw, 40px);
+        }
+
+        .module-header {
+            padding: clamp(16px, 2.4vw, 20px) clamp(16px, 2.4vw, 24px);
+        }
+
+        .tab-content {
+            padding: clamp(18px, 3vw, 24px);
+        }
+
+        /* Tabs com rolagem em telas pequenas */
+        .tabs {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        .tab {
+            flex: 0 0 auto;
+            min-width: 140px;
+        }
+
+        /* Mídia com proporção fixa */
+        .video-item video,
+        .video-wrapper iframe {
+            width: 100%;
+            height: auto;
+            aspect-ratio: 16/9;
+        }
+
+        @media (max-width: 1280px) {
+            .container { padding: clamp(20px, 3.2vw, 32px) clamp(14px, 2.6vw, 28px); }
+        }
+
+        @media (max-width: 992px) {
+            .navbar .container {
+                height: auto;
+                padding: 12px 24px;
+                gap: 12px;
+                flex-direction: column;
+            }
+            .navbar .nav-menu { flex-wrap: wrap; justify-content: center; }
+            .course-actions { flex-direction: column; }
+            .btn { width: 100%; }
+        }
+
+        @media (max-width: 768px) {
+            .course-header h1 { font-size: clamp(22px, 6vw, 28px); }
+            .tab { min-width: 120px; padding: 12px 16px; }
+            .video-item-header h4 { font-size: clamp(16px, 4.5vw, 18px); }
+        }
+
+        @media (max-width: 576px) {
+            .navbar .nav-menu {
+                gap: 6px;
+                overflow-x: auto;
+                padding-bottom: 6px;
+            }
+            .course-header { padding: 24px; }
+            .modules-section { padding: 24px; }
+            .content-item { flex-direction: column; align-items: flex-start; gap: 12px; }
+            .content-item a { width: 100%; justify-content: center; }
+            .content-item span { width: 100%; }
+            .video-item-header h4 { font-size: 16px; }
+            .modal-body { padding: 20px; }
+        }
+
+        .btn:focus-visible,
+        .navbar .nav-menu a:focus-visible {
+            outline: 2px solid var(--accent-color);
+            outline-offset: 2px;
+        }
+    </style>
 </head>
 <body>
+    <style>
+        /* Botão de menu (hambúrguer) ao lado do "Área Dev" */
+        .menu-toggle {
+            display: none;
+            background: rgba(0, 179, 72, 0.12);
+            border: 1px solid rgba(0, 179, 72, 0.3);
+            color: #ffffff;
+            padding: 10px 14px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            gap: 8px;
+        }
+        .menu-toggle i { color: var(--header-color); }
+
+        /* Agrupa logo + botão para ficarem lado a lado */
+        .navbar .brand-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* Overlay para fundo quando o menu lateral estiver aberto */
+        .sidebar-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+            z-index: 999;
+        }
+        .sidebar-overlay.active { opacity: 1; visibility: visible; }
+
+        @media (max-width: 992px) {
+            .menu-toggle { display: inline-flex; align-items: center; }
+            .navbar { position: sticky; }
+            .navbar .container { position: relative; gap: 12px; }
+
+            /* Menu vira uma lateral fixa (off-canvas) */
+            .navbar .nav-menu {
+                position: fixed;
+                top: 0;
+                left: 0;
+                height: 100vh;
+                width: min(85vw, 320px);
+                background: var(--sidebar-bg);
+                border-right: 1px solid var(--border-color);
+                padding: 80px 12px 16px; /* espaço para header */
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+                z-index: 1000;
+                box-shadow: var(--shadow-lg);
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+                overflow-y: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            body.menu-open .navbar .nav-menu { transform: translateX(0); }
+
+            .navbar .nav-menu a { width: 100%; padding: 12px 14px; border-radius: 8px; }
+            .navbar .user-info { width: 100%; justify-content: flex-start; margin: 8px 0; }
+        }
+    </style>
     <nav class="navbar">
         <div class="container">
-            <a href="<?php echo BASE_PATH; ?>/dashboard" class="logo">
-                  Área Dev
-            </a>
-            <ul class="nav-menu">
+            <div class="brand-group">
+                <a href="<?php echo BASE_PATH; ?>/dashboard" class="logo">
+                      Área Dev
+                </a>
+                <button class="menu-toggle" aria-label="Abrir menu" aria-expanded="false" aria-controls="primary-menu">
+                    <i class="fas fa-bars"></i>
+                    Menu
+                </button>
+            </div>
+            <ul class="nav-menu" id="primary-menu">
                 <li><a href="<?php echo BASE_PATH; ?>/dashboard"><i class="fas fa-home"></i> Dashboard</a></li>
                 <li><a href="<?php echo BASE_PATH; ?>/cursos"><i class="fas fa-book"></i> Cursos</a></li>
                 <li><a href="<?php echo BASE_PATH; ?>/meus-cursos"><i class="fas fa-graduation-cap"></i> Meus Cursos</a></li>
@@ -1143,6 +1324,7 @@
             </ul>
         </div>
     </nav>
+    <div class="sidebar-overlay" aria-hidden="true"></div>
     
     <!-- Modal de Confirmação Personalizado -->
     <div id="customConfirmModal" class="custom-confirm-modal">
@@ -1830,4 +2012,33 @@
         }
     </script>
 </body>
+<script>
+  (function(){
+    const toggle = document.querySelector('.menu-toggle');
+    const menu = document.getElementById('primary-menu');
+    const overlay = document.querySelector('.sidebar-overlay');
+    if (!toggle || !menu || !overlay) return;
+
+    const closeMenu = () => {
+      document.body.classList.remove('menu-open');
+      overlay.classList.remove('active');
+      document.body.style.overflow = '';
+      toggle.setAttribute('aria-expanded','false');
+    };
+
+    toggle.addEventListener('click', () => {
+      const willOpen = !document.body.classList.contains('menu-open');
+      document.body.classList.toggle('menu-open');
+      overlay.classList.toggle('active');
+      document.body.style.overflow = willOpen ? 'hidden' : '';
+      toggle.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+    });
+
+    overlay.addEventListener('click', closeMenu);
+    menu.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
+      if (window.innerWidth <= 992) closeMenu();
+    }));
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeMenu(); });
+  })();
+</script>
 </html>
