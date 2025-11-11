@@ -11,7 +11,6 @@ class Curso {
     public $descricao;
     public $imagem_capa;
     public $nivel_requerido;
-    public $preco_coins;
     public $ativo;
     
     public function __construct() {
@@ -24,8 +23,8 @@ class Curso {
     
     public function criar() {
         $query = "INSERT INTO " . $this->table . " 
-                  (titulo, descricao, imagem_capa, nivel_requerido, preco_coins, ativo) 
-                  VALUES (:titulo, :descricao, :imagem_capa, :nivel_requerido, :preco_coins, :ativo)";
+                  (titulo, descricao, imagem_capa, nivel_requerido, ativo) 
+                  VALUES (:titulo, :descricao, :imagem_capa, :nivel_requerido, :ativo)";
         
         $stmt = $this->conn->prepare($query);
         
@@ -33,7 +32,6 @@ class Curso {
         $stmt->bindParam(':descricao', $this->descricao);
         $stmt->bindParam(':imagem_capa', $this->imagem_capa);
         $stmt->bindParam(':nivel_requerido', $this->nivel_requerido);
-        $stmt->bindParam(':preco_coins', $this->preco_coins);
         $stmt->bindParam(':ativo', $this->ativo);
         
         return $stmt->execute();
@@ -101,15 +99,14 @@ class Curso {
         return $stmt->rowCount() > 0;
     }
     
-    public function comprarCurso($usuario_id, $curso_id, $preco_coins) {
+    public function registrarAcessoCurso($usuario_id, $curso_id) {
         try {
-            $query = "INSERT INTO compras_cursos (usuario_id, curso_id, preco_pago_coins) 
-                      VALUES (:usuario_id, :curso_id, :preco_coins)";
+            $query = "INSERT INTO compras_cursos (usuario_id, curso_id) 
+                      VALUES (:usuario_id, :curso_id)";
             
             $stmt = $this->conn->prepare($query);
             $stmt->bindParam(':usuario_id', $usuario_id);
             $stmt->bindParam(':curso_id', $curso_id);
-            $stmt->bindParam(':preco_coins', $preco_coins);
             
             return $stmt->execute();
             
@@ -299,93 +296,5 @@ class Curso {
         return $todos_cursos[$posicao_atual - 1];
     }
     
-    public function concederRecompensaConclusao($usuario_id, $curso_id) {
-        // Verifica se já recebeu a recompensa
-        $query = "SELECT id FROM transacoes 
-                  WHERE usuario_id = :usuario_id 
-                  AND tipo_referencia = 'curso' 
-                  AND referencia_id = :curso_id
-                  AND descricao LIKE '%Conclusão do curso%'
-                  LIMIT 1";
-        
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(':usuario_id', $usuario_id);
-        $stmt->bindParam(':curso_id', $curso_id);
-        $stmt->execute();
-        
-        if ($stmt->rowCount() > 0) {
-            // Já recebeu a recompensa
-            return false;
-        }
-        
-        // Define recompensa por curso
-        $recompensas = [
-            1 => ['coins' => 10, 'xp' => 100],  // Curso 1
-            2 => ['coins' => 10, 'xp' => 100],  // Curso 2
-            3 => ['coins' => 20, 'xp' => 200],  // Curso 3
-            4 => ['coins' => 10, 'xp' => 100]   // Curso 4
-        ];
-        
-        if (!isset($recompensas[$curso_id])) {
-            return false;
-        }
-        
-        $recompensa = $recompensas[$curso_id];
-        $this->conn->beginTransaction();
-        
-        try {
-            // Adiciona coins
-            if ($recompensa['coins'] > 0) {
-                $query = "INSERT INTO transacoes 
-                          (usuario_id, tipo, operacao, quantidade, descricao, referencia_id, tipo_referencia) 
-                          VALUES (:usuario_id, 'coins', 'entrada', :quantidade, 'Bônus por conclusão do curso', :curso_id, 'curso')";
-                
-                $stmt = $this->conn->prepare($query);
-                $stmt->bindParam(':usuario_id', $usuario_id);
-                $stmt->bindParam(':quantidade', $recompensa['coins']);
-                $stmt->bindParam(':curso_id', $curso_id);
-                $stmt->execute();
-                
-                // Atualiza saldo do usuário
-                $query = "UPDATE usuarios SET coins = coins + :coins WHERE id = :id";
-                $stmt = $this->conn->prepare($query);
-                $stmt->bindParam(':coins', $recompensa['coins']);
-                $stmt->bindParam(':id', $usuario_id);
-                $stmt->execute();
-            }
-            
-            // Adiciona XP
-            if ($recompensa['xp'] > 0) {
-                $query = "INSERT INTO transacoes 
-                          (usuario_id, tipo, operacao, quantidade, descricao, referencia_id, tipo_referencia) 
-                          VALUES (:usuario_id, 'xp', 'entrada', :quantidade, 'Bônus por conclusão do curso', :curso_id, 'curso')";
-                
-                $stmt = $this->conn->prepare($query);
-                $stmt->bindParam(':usuario_id', $usuario_id);
-                $stmt->bindParam(':quantidade', $recompensa['xp']);
-                $stmt->bindParam(':curso_id', $curso_id);
-                $stmt->execute();
-                
-                // Atualiza XP do usuário
-                require_once __DIR__ . '/Usuario.php';
-                $usuarioModel = new Usuario();
-                $usuarioModel->adicionarXP($usuario_id, $recompensa['xp']);
-            }
-            
-            $this->conn->commit();
-            return $recompensa;
-            
-        } catch (Exception $e) {
-            $this->conn->rollBack();
-            return false;
-        }
-    }
-    
-    public function verificarEConceberRecompensaConclusao($usuario_id, $curso_id) {
-        // Verifica se o curso está 100% concluído
-        if ($this->verificarCursoConcluido($usuario_id, $curso_id)) {
-            return $this->concederRecompensaConclusao($usuario_id, $curso_id);
-        }
-        return false;
-    }
+    // Sistema de recompensas removido - cursos agora são gratuitos baseado apenas no nível
 }

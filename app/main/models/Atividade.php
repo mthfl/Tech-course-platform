@@ -26,11 +26,17 @@ class Atividade {
                   WHERE modulo_id = :modulo_id AND ativo = 1 
                   ORDER BY ordem ASC";
         
+        // Debug da query
+        error_log("DEBUG Atividade::buscarPorModulo - Query: " . $query . " - modulo_id: " . $modulo_id);
+        
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':modulo_id', $modulo_id);
         $stmt->execute();
         
-        return $stmt->fetchAll();
+        $resultados = $stmt->fetchAll();
+        error_log("DEBUG Atividade::buscarPorModulo - Resultados encontrados: " . count($resultados));
+        
+        return $resultados;
     }
     
     public function buscarPorId($id) {
@@ -90,149 +96,37 @@ class Atividade {
         return 0;
     }
     
-    public function verificarTentativas($usuario_id, $atividade_id) {
-        // Verifica quantas tentativas o usuário já fez e se pode tentar novamente
-        // Só pode refazer se tiver errado alguma questão (nota < 100%)
-        $query = "SELECT tentativas, ultima_tentativa, pontuacao, respostas FROM respostas_usuarios 
-                  WHERE usuario_id = :usuario_id AND atividade_id = :atividade_id 
-                  LIMIT 1";
-        
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(':usuario_id', $usuario_id);
-        $stmt->bindParam(':atividade_id', $atividade_id);
-        $stmt->execute();
-        $resultado = $stmt->fetch();
-        
-        if (!$resultado) {
-            // Primeira tentativa
-            return [
-                'pode_tentar' => true,
-                'tentativas' => 0,
-                'tentativas_restantes' => 3,
-                'bloqueado_ate' => null,
-                'ja_fez' => false,
-                'pode_refazer' => false
-            ];
-        }
-        
-        $tentativas = isset($resultado['tentativas']) ? (int)$resultado['tentativas'] : 0;
-        $ultima_tentativa = $resultado['ultima_tentativa'];
-        $pontuacao = isset($resultado['pontuacao']) ? (float)$resultado['pontuacao'] : 0;
-        $ja_fez = true;
-        
-        // Verifica se acertou tudo (100%) - se sim, não pode refazer
-        $pode_refazer = $pontuacao < 100;
-        
-        // Se já fez 3 tentativas, verifica se passaram 6 horas
-        if ($tentativas >= 3) {
-            $ultima_tentativa_timestamp = strtotime($ultima_tentativa);
-            $agora = time();
-            $horas_passadas = ($agora - $ultima_tentativa_timestamp) / 3600;
-            
-            if ($horas_passadas < 6) {
-                $horas_restantes = ceil(6 - $horas_passadas);
-                $bloqueado_ate = date('Y-m-d H:i:s', $ultima_tentativa_timestamp + (6 * 3600));
-                
-                return [
-                    'pode_tentar' => false,
-                    'tentativas' => $tentativas,
-                    'tentativas_restantes' => 0,
-                    'bloqueado_ate' => $bloqueado_ate,
-                    'horas_restantes' => $horas_restantes,
-                    'ja_fez' => $ja_fez,
-                    'pode_refazer' => false
-                ];
-            } else {
-                // Passaram 6 horas, reseta tentativas mas só pode refazer se tiver errado
-                $query = "UPDATE respostas_usuarios 
-                          SET tentativas = 0, ultima_tentativa = NOW()
-                          WHERE usuario_id = :usuario_id AND atividade_id = :atividade_id";
-                $stmt = $this->conn->prepare($query);
-                $stmt->bindParam(':usuario_id', $usuario_id);
-                $stmt->bindParam(':atividade_id', $atividade_id);
-                $stmt->execute();
-                
-                return [
-                    'pode_tentar' => $pode_refazer,
-                    'tentativas' => 0,
-                    'tentativas_restantes' => $pode_refazer ? 3 : 0,
-                    'bloqueado_ate' => null,
-                    'ja_fez' => $ja_fez,
-                    'pode_refazer' => $pode_refazer
-                ];
-            }
-        }
-        
-        // Ainda tem tentativas disponíveis, mas só pode refazer se tiver errado
+   public function verificarTentativas($usuario_id, $atividade_id) {
+    $query = "SELECT pontuacao, respostas FROM respostas_usuarios 
+              WHERE usuario_id = :usuario_id AND atividade_id = :atividade_id 
+              LIMIT 1";
+    
+    $stmt = $this->conn->prepare($query);
+    $stmt->bindParam(':usuario_id', $usuario_id);
+    $stmt->bindParam(':atividade_id', $atividade_id);
+    $stmt->execute();
+    $resultado = $stmt->fetch();
+    
+    if (!$resultado) {
         return [
-            'pode_tentar' => $pode_refazer,
-            'tentativas' => $tentativas,
-            'tentativas_restantes' => $pode_refazer ? (3 - $tentativas) : 0,
-            'bloqueado_ate' => null,
-            'ja_fez' => $ja_fez,
-            'pode_refazer' => $pode_refazer,
-            'nota_atual' => $pontuacao
+            'pode_tentar' => true,
+            'ja_fez' => false,
+            'pode_refazer' => false
         ];
     }
     
-    public function calcularRecompensaProporcional($usuario_id, $atividade_id, $respostas_novas) {
-        // Calcula recompensa proporcional apenas para questões que foram erradas antes e acertadas agora
-        $respostas_anteriores = $this->verificarRespostasUsuario($usuario_id, $atividade_id);
-        $atividade = $this->buscarPorId($atividade_id);
-        
-        if (!$atividade || !$atividade['conteudo']) {
-            return ['coins' => 0, 'xp' => 0, 'questoes_corrigidas' => 0, 'total_perguntas' => 0];
-        }
-        
-        $conteudo = json_decode($atividade['conteudo'], true);
-        if (!$conteudo || !isset($conteudo['perguntas'])) {
-            return ['coins' => 0, 'xp' => 0, 'questoes_corrigidas' => 0, 'total_perguntas' => 0];
-        }
-        
-        $recompensa_total = $this->buscarRecompensa($atividade_id);
-        if (!$recompensa_total) {
-            return ['coins' => 0, 'xp' => 0, 'questoes_corrigidas' => 0, 'total_perguntas' => 0];
-        }
-        
-        $total_perguntas = count($conteudo['perguntas']);
-        $questoes_corrigidas = 0;
-        
-        // Verifica quais questões foram erradas antes e acertadas agora
-        foreach ($respostas_novas as $resposta) {
-            $pergunta_index = isset($resposta['pergunta_index']) ? (int)$resposta['pergunta_index'] : -1;
-            $opcao_index = isset($resposta['opcao_index']) ? (int)$resposta['opcao_index'] : -1;
-            
-            if ($pergunta_index >= 0 && isset($conteudo['perguntas'][$pergunta_index])) {
-                $pergunta = $conteudo['perguntas'][$pergunta_index];
-                if (isset($pergunta['opcoes'][$opcao_index])) {
-                    $correta_agora = $pergunta['opcoes'][$opcao_index]['correta'] ?? false;
-                    
-                    // Verifica se estava errada antes
-                    $estava_errada = true;
-                    if (isset($respostas_anteriores[$pergunta_index])) {
-                        $resposta_anterior = $respostas_anteriores[$pergunta_index];
-                        $estava_errada = !($resposta_anterior['correta'] ?? false);
-                    }
-                    
-                    // Se estava errada e agora está correta, conta como corrigida
-                    if ($estava_errada && $correta_agora) {
-                        $questoes_corrigidas++;
-                    }
-                }
-            }
-        }
-        
-        // Calcula recompensa proporcional
-        $coins_proporcional = $total_perguntas > 0 ? round(($questoes_corrigidas / $total_perguntas) * $recompensa_total['coins']) : 0;
-        $xp_proporcional = $total_perguntas > 0 ? round(($questoes_corrigidas / $total_perguntas) * $recompensa_total['xp']) : 0;
-        
-        return [
-            'coins' => $coins_proporcional,
-            'xp' => $xp_proporcional,
-            'questoes_corrigidas' => $questoes_corrigidas,
-            'total_perguntas' => $total_perguntas
-        ];
-    }
+    $nota = $resultado['pontuacao'] ?? 0;
+    $pode_refazer = $nota < 100;
+    
+    return [
+        'pode_tentar' => $pode_refazer,
+        'ja_fez' => true,
+        'pode_refazer' => $pode_refazer,
+        'nota_atual' => $nota
+    ];
+}
+    
+    // Sistema de recompensas removido - atividades não dão mais coins ou XP
     
     public function salvarResposta($usuario_id, $atividade_id, $respostas_array) {
         // Verifica se pode tentar
@@ -378,69 +272,7 @@ class Atividade {
         return [];
     }
     
-    public function buscarRecompensa($atividade_id) {
-        $query = "SELECT coins, xp FROM recompensas 
-                  WHERE tipo_referencia = 'atividade' AND referencia_id = :atividade_id 
-                  LIMIT 1";
-        
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(':atividade_id', $atividade_id);
-        $stmt->execute();
-        
-        return $stmt->fetch();
-    }
-    
-    public function verificarRecompensaRecebida($usuario_id, $atividade_id) {
-        $query = "SELECT id FROM transacoes 
-                  WHERE usuario_id = :usuario_id 
-                  AND tipo_referencia = 'atividade' 
-                  AND referencia_id = :atividade_id 
-                  LIMIT 1";
-        
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(':usuario_id', $usuario_id);
-        $stmt->bindParam(':atividade_id', $atividade_id);
-        $stmt->execute();
-        
-        return $stmt->rowCount() > 0;
-    }
-    
-    public function registrarRecompensa($usuario_id, $atividade_id, $coins, $xp) {
-        $this->conn->beginTransaction();
-        
-        try {
-            if ($coins > 0) {
-                $query = "INSERT INTO transacoes 
-                          (usuario_id, tipo, operacao, quantidade, descricao, referencia_id, tipo_referencia) 
-                          VALUES (:usuario_id, 'coins', 'entrada', :quantidade, 'Recompensa por completar atividade', :atividade_id, 'atividade')";
-                
-                $stmt = $this->conn->prepare($query);
-                $stmt->bindParam(':usuario_id', $usuario_id);
-                $stmt->bindParam(':quantidade', $coins);
-                $stmt->bindParam(':atividade_id', $atividade_id);
-                $stmt->execute();
-            }
-            
-            if ($xp > 0) {
-                $query = "INSERT INTO transacoes 
-                          (usuario_id, tipo, operacao, quantidade, descricao, referencia_id, tipo_referencia) 
-                          VALUES (:usuario_id, 'xp', 'entrada', :quantidade, 'Recompensa por completar atividade', :atividade_id, 'atividade')";
-                
-                $stmt = $this->conn->prepare($query);
-                $stmt->bindParam(':usuario_id', $usuario_id);
-                $stmt->bindParam(':quantidade', $xp);
-                $stmt->bindParam(':atividade_id', $atividade_id);
-                $stmt->execute();
-            }
-            
-            $this->conn->commit();
-            return true;
-            
-        } catch (Exception $e) {
-            $this->conn->rollBack();
-            return false;
-        }
-    }
+    // Métodos de recompensa removidos - atividades não dão mais coins ou XP
     
     public function buscarAtividadesDoUsuario($usuario_id) {
         $query = "SELECT DISTINCT a.*, m.curso_id, c.titulo as curso_titulo

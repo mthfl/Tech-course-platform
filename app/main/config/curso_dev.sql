@@ -2,8 +2,8 @@
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Host: localhost
--- Tempo de geração: 10/11/2025 às 01:54
+-- Host: 127.0.0.1
+-- Tempo de geração: 11/11/2025 às 00:45
 -- Versão do servidor: 10.4.32-MariaDB
 -- Versão do PHP: 8.2.12
 
@@ -61,7 +61,6 @@ CREATE TABLE `compras_cursos` (
   `id` int(11) NOT NULL,
   `usuario_id` int(11) NOT NULL,
   `curso_id` int(11) NOT NULL,
-  `preco_pago_coins` int(11) NOT NULL,
   `data_compra` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -69,8 +68,8 @@ CREATE TABLE `compras_cursos` (
 -- Despejando dados para a tabela `compras_cursos`
 --
 
-INSERT INTO `compras_cursos` (`id`, `usuario_id`, `curso_id`, `preco_pago_coins`, `data_compra`) VALUES
-(2, 1, 2, 40, '2025-11-10 00:35:56');
+INSERT INTO `compras_cursos` (`id`, `usuario_id`, `curso_id`, `data_compra`) VALUES
+(3, 1, 2, '2025-11-10 20:29:23');
 
 -- --------------------------------------------------------
 
@@ -84,7 +83,6 @@ CREATE TABLE `cursos` (
   `descricao` text DEFAULT NULL,
   `imagem_capa` varchar(255) DEFAULT NULL,
   `nivel_requerido` enum('iniciante','intermediario','avancado') NOT NULL,
-  `preco_coins` int(11) NOT NULL,
   `ativo` tinyint(1) DEFAULT 1,
   `data_criacao` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -93,11 +91,11 @@ CREATE TABLE `cursos` (
 -- Despejando dados para a tabela `cursos`
 --
 
-INSERT INTO `cursos` (`id`, `titulo`, `descricao`, `imagem_capa`, `nivel_requerido`, `preco_coins`, `ativo`, `data_criacao`) VALUES
-(1, 'Git e Github com Boas Práticas', 'Aprenda Git e Github com boas práticas e muita atividade em equipe. Desenvolva suas habilidades de controle de versão e colaboração em projetos reais.', NULL, 'intermediario', 80, 1, '2025-11-05 23:50:48'),
-(2, 'Padlet: Colaboração e Gestão de Sprint', 'Aprenda a usar e atualizar o Padlet com prática associada às ações da sprint. Domine ferramentas de colaboração e organização de equipe.', NULL, 'iniciante', 40, 1, '2025-11-05 23:50:48'),
-(3, 'Frameworks Frontend', 'Explore os principais frameworks frontend do mercado. Aprenda React, Vue, Angular e outras tecnologias modernas para desenvolvimento web.', NULL, 'intermediario', 100, 1, '2025-11-05 23:50:48'),
-(4, 'FPDF e Outras Bibliotecas', 'Domine a geração de PDFs com FPDF e outras bibliotecas essenciais. Aprenda a criar documentos profissionais programaticamente.', NULL, 'intermediario', 80, 1, '2025-11-05 23:50:48');
+INSERT INTO `cursos` (`id`, `titulo`, `descricao`, `imagem_capa`, `nivel_requerido`, `ativo`, `data_criacao`) VALUES
+(1, 'Git e Github com Boas Práticas', 'Aprenda Git e Github com boas práticas e muita atividade em equipe. Desenvolva suas habilidades de controle de versão e colaboração em projetos reais.', NULL, 'intermediario', 1, '2025-11-05 23:50:48'),
+(2, 'Padlet: Colaboração e Gestão de Sprint', 'Aprenda a usar e atualizar o Padlet com prática associada às ações da sprint. Domine ferramentas de colaboração e organização de equipe.', NULL, 'iniciante', 1, '2025-11-05 23:50:48'),
+(3, 'Frameworks Frontend', 'Explore os principais frameworks frontend do mercado. Aprenda React, Vue, Angular e outras tecnologias modernas para desenvolvimento web.', NULL, 'intermediario', 1, '2025-11-05 23:50:48'),
+(4, 'FPDF e Outras Bibliotecas', 'Domine a geração de PDFs com FPDF e outras bibliotecas essenciais. Aprenda a criar documentos profissionais programaticamente.', NULL, 'intermediario', 1, '2025-11-05 23:50:48');
 
 -- --------------------------------------------------------
 
@@ -135,45 +133,19 @@ INSERT INTO `modulos` (`id`, `curso_id`, `titulo`, `descricao`, `ordem`) VALUES
 
 CREATE TABLE `niveis_usuario` (
   `nivel` enum('iniciante','intermediario','avancado','premium') NOT NULL,
-  `xp_necessario` int(11) NOT NULL,
-  `descricao` varchar(255) DEFAULT NULL
+  `descricao` varchar(255) DEFAULT NULL,
+  `ordem_hierarquia` int(11) DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Despejando dados para a tabela `niveis_usuario`
 --
 
-INSERT INTO `niveis_usuario` (`nivel`, `xp_necessario`, `descricao`) VALUES
-('iniciante', 0, 'Acesso a cursos básicos'),
-('intermediario', 1000, 'Acesso a cursos intermediários'),
-('avancado', 3000, 'Acesso a cursos avançados'),
-('premium', 5000, 'Acesso a todos os cursos');
-
--- --------------------------------------------------------
-
---
--- Estrutura para tabela `recompensas`
---
-
-CREATE TABLE `recompensas` (
-  `id` int(11) NOT NULL,
-  `tipo_referencia` enum('video','atividade','curso_conclusao') NOT NULL,
-  `referencia_id` int(11) NOT NULL,
-  `coins` int(11) DEFAULT 0,
-  `xp` int(11) DEFAULT 0
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Despejando dados para a tabela `recompensas`
---
-
-INSERT INTO `recompensas` (`id`, `tipo_referencia`, `referencia_id`, `coins`, `xp`) VALUES
-(1, 'atividade', 1, 10, 50),
-(2, 'atividade', 2, 10, 50),
-(3, 'atividade', 3, 10, 50),
-(4, 'atividade', 4, 10, 50),
-(5, 'atividade', 5, 10, 50),
-(6, 'atividade', 6, 10, 50);
+INSERT INTO `niveis_usuario` (`nivel`, `descricao`, `ordem_hierarquia`) VALUES
+('iniciante', 'Acesso a cursos básicos', 1),
+('intermediario', 'Acesso a cursos intermediários', 2),
+('avancado', 'Acesso a cursos avançados', 3),
+('premium', 'Acesso a todos os cursos', 0);
 
 -- --------------------------------------------------------
 
@@ -193,34 +165,6 @@ CREATE TABLE `respostas_usuarios` (
 -- --------------------------------------------------------
 
 --
--- Estrutura para tabela `transacoes`
---
-
-CREATE TABLE `transacoes` (
-  `id` int(11) NOT NULL,
-  `usuario_id` int(11) NOT NULL,
-  `tipo` enum('coins','xp') NOT NULL,
-  `operacao` enum('entrada','saida') NOT NULL,
-  `quantidade` int(11) NOT NULL,
-  `descricao` varchar(255) NOT NULL,
-  `referencia_id` int(11) DEFAULT NULL,
-  `tipo_referencia` enum('video','atividade','curso','compra','outro') DEFAULT NULL,
-  `data_transacao` datetime DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Despejando dados para a tabela `transacoes`
---
-
-INSERT INTO `transacoes` (`id`, `usuario_id`, `tipo`, `operacao`, `quantidade`, `descricao`, `referencia_id`, `tipo_referencia`, `data_transacao`) VALUES
-(5, 1, 'coins', 'entrada', 5, 'Recompensa por assistir vídeo', 1, 'video', '2025-11-10 00:37:16'),
-(6, 1, 'xp', 'entrada', 25, 'Recompensa por assistir vídeo', 1, 'video', '2025-11-10 00:37:16'),
-(7, 1, 'coins', 'entrada', 10, 'Bônus por conclusão do curso', 2, 'curso', '2025-11-10 00:37:16'),
-(8, 1, 'xp', 'entrada', 100, 'Bônus por conclusão do curso', 2, 'curso', '2025-11-10 00:37:16');
-
--- --------------------------------------------------------
-
---
 -- Estrutura para tabela `usuarios`
 --
 
@@ -231,8 +175,6 @@ CREATE TABLE `usuarios` (
   `senha` varchar(255) NOT NULL,
   `data_cadastro` datetime DEFAULT current_timestamp(),
   `nivel_conta` enum('iniciante','intermediario','avancado','premium') DEFAULT 'iniciante',
-  `coins` int(11) DEFAULT 0,
-  `xp_total` int(11) DEFAULT 0,
   `ativo` tinyint(1) DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -240,8 +182,9 @@ CREATE TABLE `usuarios` (
 -- Despejando dados para a tabela `usuarios`
 --
 
-INSERT INTO `usuarios` (`id`, `nome`, `email`, `senha`, `data_cadastro`, `nivel_conta`, `coins`, `xp_total`, `ativo`) VALUES
-(1, 'Matheus Felix', 'matheus.dev91@gmail.com', '$2y$10$nbtrumXfdUGNSJIQZbrtU.VqAr0x4hqF.RgO.00lTgi6ikQxjY9Eq', '2025-11-05 23:48:40', 'iniciante', 15, 125, 1);
+INSERT INTO `usuarios` (`id`, `nome`, `email`, `senha`, `data_cadastro`, `nivel_conta`, `ativo`) VALUES
+(1, 'Matheus Felix', 'matheus.dev91@gmail.com', '$2y$10$nbtrumXfdUGNSJIQZbrtU.VqAr0x4hqF.RgO.00lTgi6ikQxjY9Eq', '2025-11-05 23:48:40', 'iniciante', 1),
+(2, 'Teste User', 'teste@teste.com', '$2y$10$r9kFJhhXR2Lj/T7mJJJcGOBcZmTkrwnkLjHNAJ3hwu6oVu6oXtZS6', '2025-11-10 19:18:27', 'iniciante', 1);
 
 -- --------------------------------------------------------
 
@@ -330,17 +273,7 @@ ALTER TABLE `modulos`
 -- Índices de tabela `niveis_usuario`
 --
 ALTER TABLE `niveis_usuario`
-  ADD PRIMARY KEY (`nivel`),
-  ADD KEY `idx_xp_necessario` (`xp_necessario`);
-
---
--- Índices de tabela `recompensas`
---
-ALTER TABLE `recompensas`
-  ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `unique_recompensa` (`tipo_referencia`,`referencia_id`),
-  ADD KEY `idx_tipo_referencia` (`tipo_referencia`),
-  ADD KEY `idx_referencia_id` (`referencia_id`);
+  ADD PRIMARY KEY (`nivel`);
 
 --
 -- Índices de tabela `respostas_usuarios`
@@ -349,14 +282,6 @@ ALTER TABLE `respostas_usuarios`
   ADD PRIMARY KEY (`id`),
   ADD KEY `idx_usuario_id` (`usuario_id`),
   ADD KEY `idx_atividade_id` (`atividade_id`);
-
---
--- Índices de tabela `transacoes`
---
-ALTER TABLE `transacoes`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `idx_usuario_id` (`usuario_id`),
-  ADD KEY `idx_data_transacao` (`data_transacao`);
 
 --
 -- Índices de tabela `usuarios`
@@ -398,7 +323,7 @@ ALTER TABLE `atividades`
 -- AUTO_INCREMENT de tabela `compras_cursos`
 --
 ALTER TABLE `compras_cursos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT de tabela `cursos`
@@ -413,28 +338,16 @@ ALTER TABLE `modulos`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
--- AUTO_INCREMENT de tabela `recompensas`
---
-ALTER TABLE `recompensas`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
-
---
 -- AUTO_INCREMENT de tabela `respostas_usuarios`
 --
 ALTER TABLE `respostas_usuarios`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT de tabela `transacoes`
---
-ALTER TABLE `transacoes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
-
---
 -- AUTO_INCREMENT de tabela `usuarios`
 --
 ALTER TABLE `usuarios`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT de tabela `videos`
@@ -472,23 +385,11 @@ ALTER TABLE `modulos`
   ADD CONSTRAINT `modulos_ibfk_1` FOREIGN KEY (`curso_id`) REFERENCES `cursos` (`id`) ON DELETE CASCADE;
 
 --
--- Restrições para tabelas `recompensas`
---
-ALTER TABLE `recompensas`
-  ADD CONSTRAINT `recompensas_ibfk_1` FOREIGN KEY (`referencia_id`) REFERENCES `atividades` (`id`) ON DELETE CASCADE;
-
---
 -- Restrições para tabelas `respostas_usuarios`
 --
 ALTER TABLE `respostas_usuarios`
   ADD CONSTRAINT `respostas_usuarios_ibfk_1` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `respostas_usuarios_ibfk_2` FOREIGN KEY (`atividade_id`) REFERENCES `atividades` (`id`) ON DELETE CASCADE;
-
---
--- Restrições para tabelas `transacoes`
---
-ALTER TABLE `transacoes`
-  ADD CONSTRAINT `transacoes_ibfk_1` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`) ON DELETE CASCADE;
 
 --
 -- Restrições para tabelas `videos`

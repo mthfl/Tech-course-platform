@@ -952,8 +952,6 @@
                 <li><a href="<?php echo BASE_PATH; ?>/meus-cursos"><i class="fas fa-graduation-cap"></i> Meus Cursos</a></li>
                 <li class="user-info">
                     <span><i class="fas fa-user-circle"></i> <?php echo ucfirst($_SESSION['usuario_nivel']); ?></span>
-                    <span><i class="fas fa-coins"></i> <?php echo $_SESSION['usuario_coins']; ?></span>
-                    <span><i class="fas fa-star"></i> <?php echo $_SESSION['usuario_xp']; ?> XP</span>
                 </li>
                 <li><a href="<?php echo BASE_PATH; ?>/logout"><i class="fas fa-sign-out-alt"></i> Sair</a></li>
             </ul>
@@ -979,7 +977,6 @@
             <h1><?php echo htmlspecialchars($curso['titulo']); ?></h1>
             <div class="course-meta">
                 <span class="course-level"><?php echo ucfirst($curso['nivel_requerido']); ?></span>
-                <span class="course-price"><i class="fas fa-coins"></i> <?php echo $curso['preco_coins']; ?> coins</span>
             </div>
             <p class="course-description"><?php echo nl2br(htmlspecialchars($curso['descricao'])); ?></p>
             
@@ -1024,6 +1021,12 @@
                             <?php
                             $videos = $videoModelGlobal->buscarPorModulo($modulo['id']);
                             $atividades = $atividadeModel->buscarPorModulo($modulo['id']);
+                            
+                            // Debug temporário para verificar carregamento de atividades
+                            error_log("Módulo ID: " . $modulo['id'] . " - Atividades encontradas: " . count($atividades));
+                            
+                            // Debug visível na página
+                            echo "<!-- DEBUG: Módulo ID: " . $modulo['id'] . " - Atividades encontradas: " . count($atividades) . " -->";
                             ?>
 
                             <div class="tabs">
@@ -1041,13 +1044,9 @@
                                         <?php
                                         // Verifica se o vídeo já foi assistido
                                         $progresso_video = 0;
-                                        $recompensa_video = null;
-                                        $recompensa_recebida_video = false;
                                         
                                         if ($tem_acesso) {
                                             $progresso_video = $videoModelGlobal->verificarSeAssistido($_SESSION['usuario_id'], $video['id']);
-                                            $recompensa_video = $videoModelGlobal->buscarRecompensa($video['id']);
-                                            $recompensa_recebida_video = $videoModelGlobal->verificarRecompensaRecebida($_SESSION['usuario_id'], $video['id']);
                                         }
                                         ?>
                                         <div class="video-item" data-video-id="<?php echo $video['id']; ?>">
@@ -1082,19 +1081,6 @@
                                                             <span class="video-progress-badge">
                                                                 <i class="fas fa-play-circle"></i> Não Assistido
                                                             </span>
-                                                        <?php endif; ?>
-                                                        
-                                                        <?php if ($recompensa_recebida_video && $recompensa_video): ?>
-                                                            <div class="video-reward-notification show">
-                                                                <i class="fas fa-gift"></i> 
-                                                                <?php if ($recompensa_video['coins'] > 0): ?>
-                                                                    +<?php echo $recompensa_video['coins']; ?> coins
-                                                                <?php endif; ?>
-                                                                <?php if ($recompensa_video['xp'] > 0): ?>
-                                                                    <?php if ($recompensa_video['coins'] > 0): ?> • <?php endif; ?>
-                                                                    +<?php echo $recompensa_video['xp']; ?> XP
-                                                                <?php endif; ?>
-                                                            </div>
                                                         <?php endif; ?>
                                                     </div>
                                                     
@@ -1138,11 +1124,11 @@
                                                 // Verifica se já fez a atividade
                                                 $progresso_atividade = 0;
                                                 $ja_fez_atividade = false;
-                                                if (isset($atividadeModelGlobal)) {
-                                                    $respostas_atividade = $atividadeModelGlobal->verificarRespostasUsuario($_SESSION['usuario_id'], $atividade['id']);
+                                                if (isset($atividadeModel)) {
+                                                    $respostas_atividade = $atividadeModel->verificarRespostasUsuario($_SESSION['usuario_id'], $atividade['id']);
                                                     $ja_fez_atividade = !empty($respostas_atividade);
                                                     if ($ja_fez_atividade) {
-                                                        $nota_atividade = $atividadeModelGlobal->calcularNota($_SESSION['usuario_id'], $atividade['id']);
+                                                        $nota_atividade = $atividadeModel->calcularNota($_SESSION['usuario_id'], $atividade['id']);
                                                         $progresso_atividade = $nota_atividade;
                                                     }
                                                 }
@@ -1211,24 +1197,27 @@
         }
 
         function openAtividadeModal(atividadeId) {
-            const modal = document.getElementById('atividadeModal');
-            modal.classList.add('active');
+    const modal = document.getElementById('atividadeModal');
+    modal.classList.add('active');
 
-            fetch('<?php echo BASE_PATH; ?>/atividade/' + atividadeId)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        renderAtividade(data);
-                    } else {
-                        document.getElementById('modalBody').innerHTML =
-                            '<p style="color: #fca5a5; text-align: center;"><i class="fas fa-exclamation-circle"></i> ' + data.message + '</p>';
-                    }
-                })
-                .catch(error => {
-                    document.getElementById('modalBody').innerHTML =
-                        '<p style="color: #fca5a5; text-align: center;"><i class="fas fa-exclamation-circle"></i> Erro ao carregar atividade.</p>';
-                });
-        }
+    fetch('<?php echo BASE_PATH; ?>/atividade/' + atividadeId)
+        .then(response => response.text())
+        .then(text => {
+            console.log('Resposta da atividade:', text);
+            const data = JSON.parse(text);
+            if (data.success) {
+                renderAtividade(data);
+            } else {
+                document.getElementById('modalBody').innerHTML =
+                    '<p style="color: #fca5a5; text-align: center;"><i class="fas fa-exclamation-circle"></i> ' + data.message + '</p>';
+            }
+        })
+        .catch(error => {
+            console.error('Erro ao carregar atividade:', error);
+            document.getElementById('modalBody').innerHTML =
+                '<p style="color: #fca5a5; text-align: center;"><i class="fas fa-exclamation-circle"></i> Erro ao carregar atividade.</p>';
+        });
+}
 
         function closeAtividadeModal() {
             const modal = document.getElementById('atividadeModal');
@@ -1365,55 +1354,39 @@
             });
 
             fetch('<?php echo BASE_PATH; ?>/responder-atividade', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    atividade_id: atividadeId,
-                    respostas: respostas
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Recarrega o modal com as informações atualizadas
-                    openAtividadeModal(atividadeId);
-                    
-                    // Mensagem de sucesso melhorada
-                    let mensagem = '✓ Respostas enviadas com sucesso!\n\n';
-                    mensagem += '• Nota: ' + (data.nota || 0) + '%\n';
-                    if (data.tentativas) {
-                        mensagem += '• Tentativas restantes: ' + data.tentativas.tentativas_restantes + ' de 3\n';
-                    }
-                    if (data.recompensa_recebida && data.recompensa) {
-                        if (data.recompensa.questoes_corrigidas !== undefined) {
-                            // Recompensa proporcional (refazendo)
-                            mensagem += '• Questões corrigidas: ' + data.recompensa.questoes_corrigidas + ' de ' + data.recompensa.total_perguntas + '\n';
-                            mensagem += '• Recompensa proporcional: +' + data.recompensa.coins + ' coins e +' + data.recompensa.xp + ' XP\n';
-                        } else {
-                            // Recompensa completa (primeira vez)
-                            mensagem += '• Recompensa: +' + data.recompensa.coins + ' coins e +' + data.recompensa.xp + ' XP\n';
-                        }
-                    }
-                    
-                    alert(mensagem);
-                } else {
-                    if (data.bloqueado) {
-                        let mensagem = '⚠ ' + data.message + '\n\n';
-                        if (data.tentativas && data.tentativas.bloqueado_ate) {
-                            const bloqueadoAte = new Date(data.tentativas.bloqueado_ate);
-                            mensagem += 'Você poderá tentar novamente em: ' + bloqueadoAte.toLocaleString('pt-BR');
-                        }
-                        alert(mensagem);
-                    } else {
-                        alert('❌ ' + (data.message || 'Erro ao enviar respostas.'));
-                    }
-                }
-            })
-            .catch(() => {
-                alert('Erro na requisição. Tente novamente mais tarde.');
-            });
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+        atividade_id: atividadeId,
+        respostas: respostas
+    })
+})
+.then(response => response.text())
+.then(text => {
+    console.log('Resposta do servidor:', text);
+    const data = JSON.parse(text);
+    if (data.success) {
+        openAtividadeModal(atividadeId);
+        
+        let mensagem = '✓ Respostas enviadas com sucesso!\n\n';
+        mensagem += '• Nota: ' + (data.nota || 0) + '%\n';
+        
+        alert(mensagem);
+    } else {
+        if (data.bloqueado) {
+            let mensagem = '⚠ ' + data.message + '\n\n';
+            alert(mensagem);
+        } else {
+            alert('❌ ' + (data.message || 'Erro ao enviar respostas.'));
+        }
+    }
+})
+.catch(error => {
+    console.error('Erro ao enviar respostas:', error);
+    alert('Erro na requisição. Tente novamente mais tarde.');
+});
         }
 
         if (!window._atividadeModalClickHandlerAttached) {
@@ -1427,139 +1400,50 @@
         }
 
         // Função para marcar vídeo como assistido
-        function marcarVideoComoAssistido(videoId) {
-            const videoItem = document.querySelector(`.video-item[data-video-id="${videoId}"]`);
-            const button = videoItem.querySelector('.btn-mark-watched');
+      
+
+      function marcarVideoComoAssistido(videoId) {
+    const videoItem = document.querySelector(`.video-item[data-video-id="${videoId}"]`);
+    const button = videoItem.querySelector('.btn-mark-watched');
+    
+    button.disabled = true;
+    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processando...';
+    
+    fetch('<?php echo BASE_PATH; ?>/marcar-video-assistido', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            video_id: videoId,
+            progresso: 100
+        })
+    })
+    .then(response => response.text())
+    .then(text => {
+        console.log('Resposta do servidor:', text);
+        const data = JSON.parse(text);
+        if (data.success) {
+            const progressBadge = videoItem.querySelector('.video-progress-badge');
+            progressBadge.className = 'video-progress-badge watched';
+            progressBadge.innerHTML = '<i class="fas fa-check-circle"></i> Vídeo Assistido';
             
-            // Desabilita o botão durante o processamento
+            button.className = 'btn-mark-watched watched';
             button.disabled = true;
-            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processando...';
-            
-            fetch('<?php echo BASE_PATH; ?>/marcar-video-assistido', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    video_id: videoId,
-                    progresso: 100
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Atualiza o badge de progresso
-                    const progressBadge = videoItem.querySelector('.video-progress-badge');
-                    progressBadge.className = 'video-progress-badge watched';
-                    progressBadge.innerHTML = '<i class="fas fa-check-circle"></i> Vídeo Assistido';
-                    
-                    // Atualiza o botão
-                    button.className = 'btn-mark-watched watched';
-                    button.disabled = true;
-                    button.innerHTML = '<i class="fas fa-check-circle"></i> Já Visualizado';
-                    
-                    // Atualiza os valores na navbar se houver recompensa
-                    if (data.recompensa && data.novo_saldo_coins !== undefined) {
-                        const userInfoSpans = document.querySelectorAll('.user-info span');
-                        userInfoSpans.forEach(span => {
-                            if (span.querySelector('.fa-coins')) {
-                                span.innerHTML = '<i class="fas fa-coins"></i> ' + data.novo_saldo_coins;
-                            }
-                            if (span.querySelector('.fa-star') && data.novo_xp !== undefined) {
-                                span.innerHTML = '<i class="fas fa-star"></i> ' + data.novo_xp + ' XP';
-                            }
-                        });
-                        
-                        // Mostra notificação de recompensa no vídeo
-                        if (data.recompensa.coins > 0 || data.recompensa.xp > 0) {
-                            showVideoRewardNotification(videoItem, data.recompensa);
-                            showRewardNotification(data.recompensa);
-                        }
-                    }
-                } else {
-                    // Reabilita o botão em caso de erro
-                    button.disabled = false;
-                    button.innerHTML = '<i class="fas fa-check"></i> Marcar como Visualizado';
-                    alert(data.message || 'Erro ao marcar vídeo como assistido.');
-                }
-            })
-            .catch(error => {
-                console.error('Erro:', error);
-                // Reabilita o botão em caso de erro
-                button.disabled = false;
-                button.innerHTML = '<i class="fas fa-check"></i> Marcar como Visualizado';
-                alert('Erro ao processar. Tente novamente.');
-            });
+            button.innerHTML = '<i class="fas fa-check-circle"></i> Já Visualizado';
+        } else {
+            button.disabled = false;
+            button.innerHTML = '<i class="fas fa-check"></i> Marcar como Visualizado';
+            alert(data.message || 'Erro ao marcar vídeo como assistido.');
         }
-
-        function showVideoRewardNotification(videoItem, recompensa) {
-            // Remove notificação anterior se existir
-            const existingNotification = videoItem.querySelector('.video-reward-notification');
-            if (existingNotification) {
-                existingNotification.remove();
-            }
-            
-            // Cria nova notificação
-            const notification = document.createElement('div');
-            notification.className = 'video-reward-notification show';
-            
-            let message = '<i class="fas fa-gift"></i> Recompensa recebida: ';
-            if (recompensa.coins > 0) {
-                message += '+' + recompensa.coins + ' coins';
-            }
-            if (recompensa.xp > 0) {
-                if (recompensa.coins > 0) {
-                    message += ' • ';
-                }
-                message += '+' + recompensa.xp + ' XP';
-            }
-            
-            notification.innerHTML = message;
-            
-            // Insere a notificação antes do botão
-            const actionsDiv = videoItem.querySelector('.video-actions');
-            const firstChild = actionsDiv.querySelector('div');
-            firstChild.appendChild(notification);
-            
-            // Remove a notificação após 5 segundos
-            setTimeout(function() {
-                notification.style.opacity = '0';
-                notification.style.transition = 'opacity 0.5s';
-                setTimeout(function() {
-                    notification.remove();
-                }, 500);
-            }, 5000);
-        }
-
-        function showRewardNotification(recompensa) {
-            let message = 'Recompensa recebida: ';
-            if (recompensa.coins > 0) {
-                message += '+' + recompensa.coins + ' coins ';
-            }
-            if (recompensa.xp > 0) {
-                message += '+' + recompensa.xp + ' XP';
-            }
-
-            // Cria um alerta temporário no topo da página
-            const alert = document.createElement('div');
-            alert.className = 'alert alert-success';
-            alert.style.position = 'fixed';
-            alert.style.top = '80px';
-            alert.style.right = '20px';
-            alert.style.zIndex = '10000';
-            alert.style.minWidth = '300px';
-            alert.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.3)';
-            alert.innerHTML = '<i class="fas fa-check-circle"></i> ' + message;
-            document.body.appendChild(alert);
-
-            setTimeout(function() {
-                alert.style.opacity = '0';
-                alert.style.transition = 'opacity 0.5s';
-                setTimeout(function() {
-                    alert.remove();
-                }, 500);
-            }, 4000);
-        }
+    })
+    .catch(error => {
+        console.error('Erro:', error);
+        button.disabled = false;
+        button.innerHTML = '<i class="fas fa-check"></i> Marcar como Visualizado';
+        alert('Erro ao processar. Tente novamente.');
+    });
+}
     </script>
 </body>
 </html>

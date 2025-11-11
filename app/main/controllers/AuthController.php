@@ -22,8 +22,6 @@ class AuthController {
                 $_SESSION['usuario_nome'] = $usuario->nome;
                 $_SESSION['usuario_email'] = $usuario->email;
                 $_SESSION['usuario_nivel'] = $usuario->nivel_conta;
-                $_SESSION['usuario_coins'] = $usuario->coins;
-                $_SESSION['usuario_xp'] = $usuario->xp_total;
                 
                 header('Location: ' . BASE_PATH . '/dashboard');
                 exit;
@@ -74,8 +72,6 @@ class AuthController {
             $usuario->email = $email;
             $usuario->senha = $senha;
             $usuario->nivel_conta = 'iniciante';
-            $usuario->coins = 100;
-            $usuario->xp_total = 0;
             
             if ($usuario->criar()) {
                 $_SESSION['sucesso'] = 'Cadastro realizado com sucesso! Faça login para continuar.';

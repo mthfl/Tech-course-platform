@@ -73,12 +73,7 @@ class AtividadeController {
             $nota = 0;
         }
 
-        // Buscar informações de recompensa
-        $recompensa = $atividadeModel->buscarRecompensa($id);
-        if (!$recompensa) {
-            $recompensa = false;
-        }
-        $recompensa_recebida = $atividadeModel->verificarRecompensaRecebida($_SESSION['usuario_id'], $id);
+        // Sistema de recompensas removido - atividades não dão mais coins ou XP
         
         // Verificar tentativas disponíveis
         $tentativas_info = $atividadeModel->verificarTentativas($_SESSION['usuario_id'], $id);
@@ -92,8 +87,6 @@ class AtividadeController {
             'perguntas' => $perguntas,
             'respostas_usuario' => $respostas_usuario,
             'nota' => $nota,
-            'recompensa' => $recompensa,
-            'recompensa_recebida' => $recompensa_recebida,
             'tentativas' => $tentativas_info,
             'ja_fez' => $ja_fez
         ]);
@@ -157,115 +150,33 @@ class AtividadeController {
             // Como acabamos de salvar, todas as perguntas devem ter sido respondidas
             $todas_respondidas = $total_respostas >= $total_perguntas && $total_perguntas > 0;
             
-            // Verifica se é primeira vez ou refazendo
-            $ja_recebeu_recompensa = $atividadeModel->verificarRecompensaRecebida($_SESSION['usuario_id'], $atividade_id);
-            $recompensa_recebida = false;
-            $recompensa_valor = null;
+            // Sistema de recompensas removido - atividades não concedem mais coins ou XP
             
-            // Busca a recompensa da atividade
-            $recompensa = $atividadeModel->buscarRecompensa($atividade_id);
+            // Verifica se o curso foi concluído após esta atividade
+            require_once __DIR__ . '/../models/Curso.php';
+            $cursoModel = new Curso();
             
-            // Se todas as perguntas foram respondidas e nota >= 70
-            // IMPORTANTE: A recompensa só é dada se nota >= 70
-            if ($todas_respondidas && $nota >= 70 && $recompensa) {
-                if (!$ja_recebeu_recompensa) {
-                    // Primeira vez - recebe recompensa completa
-                    if ($recompensa['coins'] > 0 || $recompensa['xp'] > 0) {
-                        $usuarioModel = new Usuario();
-                        
-                        if ($recompensa['coins'] > 0) {
-                            $usuarioModel->adicionarCoins($_SESSION['usuario_id'], $recompensa['coins']);
-                            $_SESSION['usuario_coins'] += $recompensa['coins'];
-                        }
-                        
-                        if ($recompensa['xp'] > 0) {
-                            $usuarioModel->adicionarXP($_SESSION['usuario_id'], $recompensa['xp']);
-                            $_SESSION['usuario_xp'] += $recompensa['xp'];
-                        }
-                        
-                        $atividadeModel->registrarRecompensa($_SESSION['usuario_id'], $atividade_id, $recompensa['coins'], $recompensa['xp']);
-                        $recompensa_recebida = true;
-                        $recompensa_valor = $recompensa;
-                    }
-                } else {
-                    // Refazendo - calcula recompensa proporcional apenas para questões corrigidas
-                    $recompensa_proporcional = $atividadeModel->calcularRecompensaProporcional($_SESSION['usuario_id'], $atividade_id, $respostas);
-                    
-                    if ($recompensa_proporcional['coins'] > 0 || $recompensa_proporcional['xp'] > 0) {
-                        $usuarioModel = new Usuario();
-                        
-                        if ($recompensa_proporcional['coins'] > 0) {
-                            $usuarioModel->adicionarCoins($_SESSION['usuario_id'], $recompensa_proporcional['coins']);
-                            $_SESSION['usuario_coins'] += $recompensa_proporcional['coins'];
-                        }
-                        
-                        if ($recompensa_proporcional['xp'] > 0) {
-                            $usuarioModel->adicionarXP($_SESSION['usuario_id'], $recompensa_proporcional['xp']);
-                            $_SESSION['usuario_xp'] += $recompensa_proporcional['xp'];
-                        }
-                        
-                        // Registra transação separada para recompensa proporcional
-                        $atividadeModel->registrarRecompensa($_SESSION['usuario_id'], $atividade_id, $recompensa_proporcional['coins'], $recompensa_proporcional['xp']);
-                        $recompensa_recebida = true;
-                        $recompensa_valor = [
-                            'coins' => $recompensa_proporcional['coins'],
-                            'xp' => $recompensa_proporcional['xp'],
-                            'questoes_corrigidas' => $recompensa_proporcional['questoes_corrigidas'],
-                            'total_perguntas' => $recompensa_proporcional['total_perguntas']
-                        ];
-                    }
-                }
-                
-                // Verifica se o curso foi concluído após esta atividade
-                require_once __DIR__ . '/../models/Curso.php';
-                $cursoModel = new Curso();
-                
-                // Busca o curso_id da atividade
-                $query = "SELECT m.curso_id FROM modulos m
-                          INNER JOIN atividades a ON m.id = a.modulo_id
-                          WHERE a.id = :atividade_id LIMIT 1";
-                $stmt = $atividadeModel->getConnection()->prepare($query);
-                $stmt->bindParam(':atividade_id', $atividade_id);
-                $stmt->execute();
-                $modulo = $stmt->fetch();
-                
-                $curso_concluido = false;
-                if ($modulo) {
-                    $curso_concluido = $cursoModel->verificarEConceberRecompensaConclusao($_SESSION['usuario_id'], $modulo['curso_id']);
-                    
-                    // Atualiza sessão se curso foi concluído
-                    if ($curso_concluido) {
-                        $usuarioModel = new Usuario();
-                        $usuario = $usuarioModel->buscarPorId($_SESSION['usuario_id']);
-                        if ($usuario) {
-                            $_SESSION['usuario_coins'] = $usuario['coins'];
-                            $_SESSION['usuario_xp'] = $usuario['xp_total'];
-                            $_SESSION['usuario_nivel'] = $usuario['nivel_conta'];
-                        }
-                    }
-                }
-                
-                echo json_encode([
-                    'success' => true,
-                    'nota' => $nota,
-                    'recompensa' => $recompensa_valor,
-                    'recompensa_recebida' => $recompensa_recebida,
-                    'todas_respondidas' => true,
-                    'curso_concluido' => $curso_concluido,
-                    'novo_saldo_coins' => $_SESSION['usuario_coins'],
-                    'novo_xp' => $_SESSION['usuario_xp'],
-                    'tentativas' => $tentativas_info
-                ]);
-                exit;
+            // Busca o curso_id da atividade
+            $query = "SELECT m.curso_id FROM modulos m
+                      INNER JOIN atividades a ON m.id = a.modulo_id
+                      WHERE a.id = :atividade_id LIMIT 1";
+            $stmt = $atividadeModel->getConnection()->prepare($query);
+            $stmt->bindParam(':atividade_id', $atividade_id);
+            $stmt->execute();
+            $modulo = $stmt->fetch();
+            
+            $curso_concluido = false;
+            if ($modulo) {
+                $progresso_curso = $cursoModel->calcularProgresso($_SESSION['usuario_id'], $modulo['curso_id']);
+                $curso_concluido = ($progresso_curso >= 100);
             }
             
             echo json_encode([
                 'success' => true,
                 'nota' => $nota,
                 'todas_respondidas' => $todas_respondidas,
-                'tentativas' => $tentativas_info,
-                'recompensa' => $recompensa_valor,
-                'recompensa_recebida' => $recompensa_recebida
+                'curso_concluido' => $curso_concluido,
+                'tentativas' => $tentativas_info
             ]);
             exit;
         }

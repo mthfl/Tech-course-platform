@@ -11,8 +11,6 @@ class Usuario {
     public $email;
     public $senha;
     public $nivel_conta;
-    public $coins;
-    public $xp_total;
     public $ativo;
     
     public function __construct() {
@@ -21,8 +19,8 @@ class Usuario {
     
     public function criar() {
         $query = "INSERT INTO " . $this->table . " 
-                  (nome, email, senha, nivel_conta, coins, xp_total) 
-                  VALUES (:nome, :email, :senha, :nivel_conta, :coins, :xp_total)";
+                  (nome, email, senha, nivel_conta) 
+                  VALUES (:nome, :email, :senha, :nivel_conta)";
         
         $stmt = $this->conn->prepare($query);
         
@@ -32,8 +30,6 @@ class Usuario {
         $stmt->bindParam(':email', $this->email);
         $stmt->bindParam(':senha', $this->senha);
         $stmt->bindParam(':nivel_conta', $this->nivel_conta);
-        $stmt->bindParam(':coins', $this->coins);
-        $stmt->bindParam(':xp_total', $this->xp_total);
         
         return $stmt->execute();
     }
@@ -52,8 +48,6 @@ class Usuario {
             $this->nome = $row['nome'];
             $this->email = $row['email'];
             $this->nivel_conta = $row['nivel_conta'];
-            $this->coins = $row['coins'];
-            $this->xp_total = $row['xp_total'];
             return true;
         }
         
@@ -70,71 +64,8 @@ class Usuario {
         return $stmt->fetch();
     }
     
-    public function adicionarXP($usuario_id, $xp) {
-        $query = "UPDATE " . $this->table . " 
-                  SET xp_total = xp_total + :xp 
-                  WHERE id = :id";
-        
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(':xp', $xp);
-        $stmt->bindParam(':id', $usuario_id);
-        
-        if ($stmt->execute()) {
-            $this->verificarNivelUp($usuario_id);
-            return true;
-        }
-        return false;
-    }
-    
-    public function adicionarCoins($usuario_id, $coins) {
-        $query = "UPDATE " . $this->table . " 
-                  SET coins = coins + :coins 
-                  WHERE id = :id";
-        
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(':coins', $coins);
-        $stmt->bindParam(':id', $usuario_id);
-        
-        return $stmt->execute();
-    }
-    
-    public function removerCoins($usuario_id, $coins) {
-        $query = "UPDATE " . $this->table . " 
-                  SET coins = coins - :coins 
-                  WHERE id = :id AND coins >= :coins";
-        
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(':coins', $coins);
-        $stmt->bindParam(':id', $usuario_id);
-        
-        return $stmt->execute();
-    }
-    
-    private function verificarNivelUp($usuario_id) {
-        $usuario = $this->buscarPorId($usuario_id);
-        $xp_atual = $usuario['xp_total'];
-        
-        $query = "SELECT nivel FROM niveis_usuario 
-                  WHERE xp_necessario <= :xp 
-                  ORDER BY xp_necessario DESC LIMIT 1";
-        
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(':xp', $xp_atual);
-        $stmt->execute();
-        
-        $nivel = $stmt->fetch();
-        
-        if ($nivel && $nivel['nivel'] != $usuario['nivel_conta']) {
-            $query = "UPDATE " . $this->table . " 
-                      SET nivel_conta = :nivel 
-                      WHERE id = :id";
-            
-            $stmt = $this->conn->prepare($query);
-            $stmt->bindParam(':nivel', $nivel['nivel']);
-            $stmt->bindParam(':id', $usuario_id);
-            $stmt->execute();
-        }
-    }
+    // Métodos de recompensa removidos - agora apenas nível do usuário importa
+    // O acesso aos cursos é controlado apenas pelo nível_requerido do curso
     
     public function emailExiste($email) {
         $query = "SELECT id FROM " . $this->table . " WHERE email = :email LIMIT 1";

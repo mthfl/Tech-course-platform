@@ -36,25 +36,10 @@ class CursoController {
         if ($tem_acesso) {
             $progresso = $cursoModel->calcularProgresso($_SESSION['usuario_id'], $id);
             
-            // Verifica se concluiu 100% e concede recompensa se necessário
-            if ($progresso >= 100) {
-                $recompensa = $cursoModel->concederRecompensaConclusao($_SESSION['usuario_id'], $id);
-                if ($recompensa && is_array($recompensa)) {
-                    // Atualiza a sessão com os novos valores
-                    $usuarioModel = new Usuario();
-                    $usuario = $usuarioModel->buscarPorId($_SESSION['usuario_id']);
-                    if ($usuario) {
-                        $_SESSION['usuario_coins'] = $usuario['coins'];
-                        $_SESSION['usuario_xp'] = $usuario['xp_total'];
-                        $_SESSION['usuario_nivel'] = $usuario['nivel_conta'];
-                    }
-                    
-                    // Mostra mensagem de sucesso se recebeu recompensa agora
-                    if (!isset($_SESSION['recompensa_conclusao_' . $id])) {
-                        $_SESSION['sucesso'] = 'Parabéns! Você concluiu 100% do curso e ganhou ' . $recompensa['coins'] . ' coins e ' . $recompensa['xp'] . ' XP de bônus!';
-                        $_SESSION['recompensa_conclusao_' . $id] = true;
-                    }
-                }
+            // Verifica se concluiu 100% para mostrar mensagem de parabéns
+            if ($progresso >= 100 && !isset($_SESSION['parabens_conclusao_' . $id])) {
+                $_SESSION['sucesso'] = 'Parabéns! Você concluiu 100% do curso!';
+                $_SESSION['parabens_conclusao_' . $id] = true;
             }
         }
         
@@ -99,41 +84,31 @@ class CursoController {
                 if ($tem_acesso_anterior) {
                     // Verifica o progresso do curso anterior
                     $progresso_anterior = $cursoModel->calcularProgresso($_SESSION['usuario_id'], $curso_anterior['id']);
-                    $_SESSION['erro'] = 'Você precisa concluir 100% do curso "' . htmlspecialchars($curso_anterior['titulo']) . '" antes de comprar este curso! Seu progresso atual: ' . round($progresso_anterior, 1) . '%.';
+                    $_SESSION['erro'] = 'Você precisa concluir 100% do curso "' . htmlspecialchars($curso_anterior['titulo']) . '" antes de acessar este curso! Seu progresso atual: ' . round($progresso_anterior, 1) . '%.';
                 } else {
-                    $_SESSION['erro'] = 'Você precisa comprar e concluir o curso "' . htmlspecialchars($curso_anterior['titulo']) . '" antes de comprar este curso!';
+                    $_SESSION['erro'] = 'Você precisa concluir o curso "' . htmlspecialchars($curso_anterior['titulo']) . '" antes de acessar este curso!';
                 }
             } else {
                 // Não há curso anterior (é o primeiro curso), mas a verificação falhou
-                // Isso não deveria acontecer, mas permite a compra por segurança
-                // Não bloqueia a compra se não há curso anterior
+                // Isso não deveria acontecer, mas permite o acesso por segurança
+                // Não bloqueia o acesso se não há curso anterior
             }
             
-            // Se há um curso anterior e a verificação falhou, bloqueia a compra
+            // Se há um curso anterior e a verificação falhou, bloqueia o acesso
             if ($curso_anterior) {
                 header('Location: ' . BASE_PATH . '/curso/' . $id);
                 exit;
             }
         }
         
-        if ($_SESSION['usuario_coins'] < $curso['preco_coins']) {
-            $_SESSION['erro'] = 'Você não tem coins suficientes! Você precisa de ' . $curso['preco_coins'] . ' coins, mas tem apenas ' . $_SESSION['usuario_coins'] . ' coins.';
+        // Registra o acesso ao curso (sem custo de coins)
+        if ($cursoModel->registrarAcessoCurso($_SESSION['usuario_id'], $id)) {
+            $_SESSION['sucesso'] = 'Acesso ao curso liberado com sucesso!';
             header('Location: ' . BASE_PATH . '/curso/' . $id);
             exit;
         }
         
-        $usuarioModel = new Usuario();
-        
-        if ($usuarioModel->removerCoins($_SESSION['usuario_id'], $curso['preco_coins'])) {
-            if ($cursoModel->comprarCurso($_SESSION['usuario_id'], $id, $curso['preco_coins'])) {
-                $_SESSION['usuario_coins'] -= $curso['preco_coins'];
-                $_SESSION['sucesso'] = 'Curso comprado com sucesso!';
-                header('Location: ' . BASE_PATH . '/curso/' . $id);
-                exit;
-            }
-        }
-        
-        $_SESSION['erro'] = 'Erro ao comprar curso. Tente novamente!';
+        $_SESSION['erro'] = 'Erro ao liberar acesso ao curso. Tente novamente!';
         header('Location: ' . BASE_PATH . '/curso/' . $id);
         exit;
     }

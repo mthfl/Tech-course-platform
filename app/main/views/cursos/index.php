@@ -510,8 +510,6 @@
                 
                 <li class="user-info">
                     <span><i class="fas fa-user-circle"></i> <?php echo ucfirst($_SESSION['usuario_nivel']); ?></span>
-                    <span><i class="fas fa-coins"></i> <?php echo $_SESSION['usuario_coins']; ?></span>
-                    <span><i class="fas fa-star"></i> <?php echo $_SESSION['usuario_xp']; ?> XP</span>
                 </li>
                 <li><a href="<?php echo BASE_PATH; ?>/logout"><i class="fas fa-sign-out-alt"></i> Sair</a></li>
             </ul>
@@ -571,8 +569,8 @@
 
                         <div class="course-footer">
                             <span class="course-price">
-                                <?php echo $curso['preco_coins']; ?>
-                                <i class="fas fa-coins"></i>
+                                <?php echo $curso['nivel_requerido']; ?>
+                                <i class="fas fa-level-up-alt"></i>
                             </span>
 
                             <?php if ($bloqueado): ?>
