@@ -113,8 +113,13 @@ class AtividadeController {
         $atividade_id = $data['atividade_id'] ?? 0;
         $respostas = $data['respostas'] ?? [];
         
-        if (!$atividade_id || empty($respostas)) {
-            echo json_encode(['success' => false, 'message' => 'Dados incompletos']);
+        if (!$atividade_id) {
+            echo json_encode(['success' => false, 'message' => 'ID da atividade não fornecido']);
+            exit;
+        }
+        
+        if (empty($respostas)) {
+            echo json_encode(['success' => false, 'message' => 'Nenhuma resposta foi enviada']);
             exit;
         }
         

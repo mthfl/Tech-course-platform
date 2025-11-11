@@ -101,9 +101,6 @@ class VideoController {
             'message' => 'Vídeo marcado como assistido!'
         ];
         
-    
-        
-        
         echo json_encode($response);
         exit;
     }

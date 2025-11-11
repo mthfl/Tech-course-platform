@@ -191,7 +191,7 @@
 <body>
     <div class="login-container">
         <div class="login-header">
-            <h1><?php echo APP_NAME; ?></h1>
+            <h1>Área Dev</h1>
             <p>Faça login para continuar</p>
         </div>
 

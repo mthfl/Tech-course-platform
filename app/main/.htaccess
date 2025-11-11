@@ -2,6 +2,10 @@
     RewriteEngine On
     RewriteBase /Tech-course-platform/
     
+    # Permitir acesso direto a arquivos de imagem e outros recursos
+    RewriteCond %{REQUEST_URI} \.(jpg|jpeg|png|gif|ico|css|js|svg|webp)$ [NC]
+    RewriteRule ^(.*)$ - [L]
+    
     # Redireciona tudo para app/main/
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d

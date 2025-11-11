@@ -874,6 +874,192 @@
             to { transform: translateY(0); opacity: 1; }
         }
 
+        /* Modal de Confirmação Personalizado */
+        .custom-confirm-modal {
+            display: none;
+            position: fixed;
+            z-index: 9999;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .custom-confirm-modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .confirm-modal-content {
+            background: linear-gradient(135deg, var(--card-bg) 0%, rgba(30, 30, 30, 0.95) 100%);
+            border: 2px solid var(--border-color);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: var(--shadow-lg);
+            animation: slideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .confirm-modal-content::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--header-color) 0%, var(--accent-color) 100%);
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(30px) scale(0.95);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0) scale(1);
+                opacity: 1;
+            }
+        }
+
+        .confirm-modal-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .confirm-modal-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, rgba(0, 179, 72, 0.2) 0%, rgba(255, 183, 51, 0.2) 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 32px;
+            color: var(--header-color);
+            animation: pulse 2s infinite;
+        }
+
+        .confirm-modal-title {
+            font-size: 24px;
+            font-weight: 700;
+            font-family: 'Poppins', sans-serif;
+            color: #ffffff;
+            margin-bottom: 10px;
+        }
+
+        .confirm-modal-subtitle {
+            color: var(--text-secondary);
+            font-size: 16px;
+            line-height: 1.5;
+        }
+
+        .confirm-modal-body {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .confirm-info-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 15px;
+            font-size: 15px;
+            color: var(--text-secondary);
+        }
+
+        .confirm-info-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .confirm-info-item i {
+            color: var(--header-color);
+            width: 20px;
+            text-align: center;
+        }
+
+        .confirm-info-item strong {
+            color: #ffffff;
+            font-weight: 600;
+        }
+
+        .confirm-modal-footer {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .confirm-btn {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 120px;
+            justify-content: center;
+        }
+
+        .confirm-btn-primary {
+            background: linear-gradient(135deg, var(--header-color) 0%, #007A33 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(0, 179, 72, 0.3);
+        }
+
+        .confirm-btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 179, 72, 0.4);
+        }
+
+        .confirm-btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-secondary);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .confirm-btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+        }
+
+        .confirm-warning {
+            background: rgba(255, 183, 51, 0.1);
+            border: 1px solid var(--accent-color);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .confirm-warning i {
+            color: var(--accent-color);
+            font-size: 18px;
+            margin-top: 2px;
+        }
+
+        .confirm-warning-text {
+            color: var(--accent-color);
+            font-size: 14px;
+            line-height: 1.4;
+            font-weight: 500;
+        }
+
         @media (max-width: 1024px) {
             .navbar .container {
                 padding: 0 24px;
@@ -958,6 +1144,34 @@
         </div>
     </nav>
     
+    <!-- Modal de Confirmação Personalizado -->
+    <div id="customConfirmModal" class="custom-confirm-modal">
+        <div class="confirm-modal-content">
+            <div class="confirm-modal-header">
+                <div class="confirm-modal-icon">
+                    <i class="fas fa-question-circle"></i>
+                </div>
+                <div class="confirm-modal-title">Confirmar Envio</div>
+                <div class="confirm-modal-subtitle">Revise suas respostas antes de enviar</div>
+            </div>
+            
+            <div class="confirm-modal-body" id="confirmModalBody">
+                <!-- Conteúdo dinâmico será inserido aqui -->
+            </div>
+            
+            <div class="confirm-modal-footer">
+                <button class="confirm-btn confirm-btn-secondary" onclick="fecharConfirmModal()">
+                    <i class="fas fa-times"></i>
+                    Cancelar
+                </button>
+                <button class="confirm-btn confirm-btn-primary" onclick="confirmarEnvioFinal()">
+                    <i class="fas fa-paper-plane"></i>
+                    Confirmar Envio
+                </button>
+            </div>
+        </div>
+    </div>
+    
     <div class="container">
         <?php if (isset($_SESSION['erro'])): ?>
             <div class="alert alert-error">
@@ -974,6 +1188,11 @@
         <?php endif; ?>
         
         <div class="course-header">
+            <?php if (!empty($curso['imagem_capa'])): ?>
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <img src="<?php echo BASE_PATH; ?>/uploads/cursos/<?php echo htmlspecialchars($curso['imagem_capa']); ?>" alt="<?php echo htmlspecialchars($curso['titulo']); ?>" style="max-width: 300px; max-height: 200px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
+                </div>
+            <?php endif; ?>
             <h1><?php echo htmlspecialchars($curso['titulo']); ?></h1>
             <div class="course-meta">
                 <span class="course-level"><?php echo ucfirst($curso['nivel_requerido']); ?></span>
@@ -1293,8 +1512,10 @@
 
                 // Botão de envio - desabilitado se bloqueado
                 const podeEnviar = data.tentativas && data.tentativas.pode_tentar !== false;
+                const tentativasRestantes = data.tentativas ? data.tentativas.tentativas_restantes : 0;
+                
                 if (podeEnviar) {
-                    html += '<button class="submit-btn" onclick="confirmarEnvio(' + data.atividade.id + ', ' + (data.tentativas ? data.tentativas.tentativas_restantes : 3) + ')"><i class="fas fa-paper-plane"></i> Enviar Respostas</button>';
+                    html += '<button class="submit-btn" onclick="confirmarEnvio(' + data.atividade.id + ', ' + tentativasRestantes + ')"><i class="fas fa-paper-plane"></i> Enviar Respostas</button>';
                 } else {
                     html += '<button class="submit-btn" style="opacity: 0.5; cursor: not-allowed;" disabled><i class="fas fa-lock"></i> Bloqueado - Aguarde ' + (data.tentativas ? data.tentativas.horas_restantes : 6) + ' hora(s)</button>';
                 }
@@ -1305,26 +1526,112 @@
             document.getElementById('modalBody').innerHTML = html;
         }
         
+        // Variáveis globais para o modal de confirmação
+        let globalAtividadeId = null;
+        let globalTentativasRestantes = 0;
+        let globalRespostas = [];
+
         function confirmarEnvio(atividadeId, tentativasRestantes) {
+            // Verificar se todas as perguntas foram respondidas
+            const totalPerguntas = document.querySelectorAll('.question-card').length;
             const radios = document.querySelectorAll('#modalBody input[type="radio"]:checked');
+            const respostasSelecionadas = radios.length;
             
-            if (radios.length === 0) {
+            console.log('Verificando perguntas:', {
+                totalPerguntas: totalPerguntas,
+                respostasSelecionadas: respostasSelecionadas,
+                atividadeId: atividadeId
+            });
+            
+            if (respostasSelecionadas === 0) {
                 alert('Por favor, responda pelo menos uma pergunta!');
                 return;
             }
             
-            // Modal de confirmação melhorado
-            const totalPerguntas = document.querySelectorAll('.question-card').length;
-            const respostasSelecionadas = radios.length;
+            // Preparar respostas para envio
+            const respostas = [];
+            radios.forEach(radio => {
+                const perguntaIndex = parseInt(radio.name.replace('pergunta_', ''));
+                const opcaoIndex = parseInt(radio.value);
+                respostas.push({
+                    pergunta_index: perguntaIndex,
+                    opcao_index: opcaoIndex
+                });
+            });
             
-            let mensagem = 'Confirme o envio das respostas:\n\n';
-            mensagem += '• Perguntas respondidas: ' + respostasSelecionadas + ' de ' + totalPerguntas + '\n';
-            mensagem += '• Tentativas restantes: ' + tentativasRestantes + ' de 3\n\n';
-            mensagem += 'Após 3 tentativas, você precisará aguardar 6 horas para tentar novamente.\n\n';
-            mensagem += 'Deseja realmente enviar?';
+            // Verificar se todas as perguntas foram respondidas (opcional - pode ser configurado)
+            if (respostasSelecionadas < totalPerguntas) {
+                const confirmar = confirm(`Você respondeu ${respostasSelecionadas} de ${totalPerguntas} perguntas.\n\nDeseja continuar mesmo assim?`);
+                if (!confirmar) {
+                    return;
+                }
+            }
             
-            if (confirm(mensagem)) {
-                submitAtividade(atividadeId);
+            // Armazenar dados globalmente
+            globalAtividadeId = atividadeId;
+            globalTentativasRestantes = tentativasRestantes;
+            globalRespostas = respostas;
+            
+            console.log('Dados armazenados globalmente:', {
+                globalAtividadeId: globalAtividadeId,
+                globalTentativasRestantes: globalTentativasRestantes,
+                globalRespostas: globalRespostas
+            });
+            
+            // Modal de confirmação estilizado
+            // Preencher o modal com informações
+            const modalBody = document.getElementById('confirmModalBody');
+            modalBody.innerHTML = `
+                <div class="confirm-info-item">
+                    <i class="fas fa-question-circle"></i>
+                    <span>Perguntas respondidas: <strong>${respostasSelecionadas} de ${totalPerguntas}</strong></span>
+                </div>
+                <div class="confirm-info-item">
+                    <i class="fas fa-redo"></i>
+                    <span>Tentativas restantes: <strong>${tentativasRestantes} de 3</strong></span>
+                </div>
+                <div class="confirm-warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <div class="confirm-warning-text">
+                        Após 3 tentativas, você precisará aguardar 6 horas para tentar novamente.
+                    </div>
+                </div>
+            `;
+            
+            // Mostrar o modal
+            document.getElementById('customConfirmModal').classList.add('show');
+        }
+        
+        function fecharConfirmModal() {
+            document.getElementById('customConfirmModal').classList.remove('show');
+            globalAtividadeId = null;
+            globalTentativasRestantes = 0;
+            globalRespostas = [];
+        }
+        
+        function confirmarEnvioFinal() {
+            console.log('Confirmando envio final:', {
+                globalAtividadeId: globalAtividadeId,
+                globalRespostas: globalRespostas,
+                globalTentativasRestantes: globalTentativasRestantes
+            });
+            
+            if (globalAtividadeId && globalRespostas.length > 0) {
+                // Primeiro capturar os dados antes de limpar
+                const atividadeId = globalAtividadeId;
+                const respostas = [...globalRespostas]; // Criar cópia do array
+                
+                fecharConfirmModal(); // Limpar variáveis globais
+                
+                // Enviar com os dados capturados
+                enviarRespostas(atividadeId, respostas);
+            } else {
+                console.error('Dados globais incompletos:', {
+                    globalAtividadeId: globalAtividadeId,
+                    globalRespostas: globalRespostas
+                });
+                alert('Erro: Dados da atividade não encontrados. Por favor, tente novamente.');
+                return;
             }
         }
 
@@ -1335,6 +1642,57 @@
             element.querySelector('input[type="radio"]').checked = true;
         }
 
+        function enviarRespostas(atividadeId, respostas) {
+            console.log('Enviando respostas diretas:', {
+                atividade_id: atividadeId,
+                respostas: respostas,
+                total_respostas: respostas.length,
+                tipo_atividadeId: typeof atividadeId,
+                valor_atividadeId: atividadeId
+            });
+
+            // Validação extra
+            if (!atividadeId || atividadeId === null || atividadeId === undefined) {
+                console.error('ERRO CRÍTICO: atividadeId é nulo!');
+                alert('Erro: ID da atividade não pode ser nulo. Por favor, tente novamente.');
+                return;
+            }
+
+            if (!respostas || respostas.length === 0) {
+                console.error('ERRO CRÍTICO: respostas está vazio!');
+                alert('Erro: Nenhuma resposta foi selecionada.');
+                return;
+            }
+
+            fetch('<?php echo BASE_PATH; ?>/responder-atividade', {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+        atividade_id: atividadeId,
+        respostas: respostas
+    })
+})
+            .then(response => response.json())
+            .then(data => {
+                console.log('Resposta do servidor:', data);
+                if (data.success) {
+                    // Fechar modal e recarregar sem alert de confirmação
+                    closeAtividadeModal();
+                    // Atualizar a página ou recarregar os dados
+                    location.reload();
+                } else {
+                    alert('Erro: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Erro ao enviar atividade:', error);
+                alert('Erro ao enviar atividade. Por favor, tente novamente.');
+            });
+        }
+
+        // Função wrapper para manter compatibilidade
         function submitAtividade(atividadeId) {
             const radios = document.querySelectorAll('#modalBody input[type="radio"]:checked');
 
@@ -1353,40 +1711,7 @@
                 });
             });
 
-            fetch('<?php echo BASE_PATH; ?>/responder-atividade', {
-    method: 'POST',
-    headers: {
-        'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-        atividade_id: atividadeId,
-        respostas: respostas
-    })
-})
-.then(response => response.text())
-.then(text => {
-    console.log('Resposta do servidor:', text);
-    const data = JSON.parse(text);
-    if (data.success) {
-        openAtividadeModal(atividadeId);
-        
-        let mensagem = '✓ Respostas enviadas com sucesso!\n\n';
-        mensagem += '• Nota: ' + (data.nota || 0) + '%\n';
-        
-        alert(mensagem);
-    } else {
-        if (data.bloqueado) {
-            let mensagem = '⚠ ' + data.message + '\n\n';
-            alert(mensagem);
-        } else {
-            alert('❌ ' + (data.message || 'Erro ao enviar respostas.'));
-        }
-    }
-})
-.catch(error => {
-    console.error('Erro ao enviar respostas:', error);
-    alert('Erro na requisição. Tente novamente mais tarde.');
-});
+            enviarRespostas(atividadeId, respostas);
         }
 
         if (!window._atividadeModalClickHandlerAttached) {
@@ -1396,6 +1721,30 @@
                     closeAtividadeModal();
                 }
             });
+            
+            // Fechar modal de confirmação ao clicar fora
+            window.addEventListener('click', function(event) {
+                const confirmModal = document.getElementById('customConfirmModal');
+                if (confirmModal && event.target === confirmModal) {
+                    fecharConfirmModal();
+                }
+            });
+            
+            // Fechar modais com tecla ESC
+            window.addEventListener('keydown', function(event) {
+                if (event.key === 'Escape') {
+                    const confirmModal = document.getElementById('customConfirmModal');
+                    if (confirmModal && confirmModal.classList.contains('show')) {
+                        fecharConfirmModal();
+                    }
+                    
+                    const atividadeModal = document.getElementById('atividadeModal');
+                    if (atividadeModal && atividadeModal.style.display === 'block') {
+                        closeAtividadeModal();
+                    }
+                }
+            });
+            
             window._atividadeModalClickHandlerAttached = true;
         }
 
@@ -1431,6 +1780,9 @@
             button.className = 'btn-mark-watched watched';
             button.disabled = true;
             button.innerHTML = '<i class="fas fa-check-circle"></i> Já Visualizado';
+            
+            // Atualizar progresso em tempo real
+            atualizarProgresso();
         } else {
             button.disabled = false;
             button.innerHTML = '<i class="fas fa-check"></i> Marcar como Visualizado';
@@ -1444,6 +1796,38 @@
         alert('Erro ao processar. Tente novamente.');
     });
 }
+
+        // Função para atualizar progresso em tempo real
+        function atualizarProgresso() {
+            const cursoId = <?php echo $curso['id']; ?>;
+            
+            fetch(`<?php echo BASE_PATH; ?>/api/progresso/${cursoId}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.progresso !== undefined) {
+                    const progressFill = document.querySelector('.progress-fill');
+                    const progressText = document.querySelector('.progress-section p');
+                    
+                    if (progressFill) {
+                        progressFill.style.width = data.progresso + '%';
+                    }
+                    
+                    if (progressText) {
+                        progressText.textContent = data.progresso + '% concluído';
+                    }
+                    
+                    console.log('Progresso atualizado:', data.progresso + '%');
+                }
+            })
+            .catch(error => {
+                console.error('Erro ao atualizar progresso:', error);
+            });
+        }
     </script>
 </body>
 </html>

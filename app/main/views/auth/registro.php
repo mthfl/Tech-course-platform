@@ -191,7 +191,7 @@
 <body>
     <div class="register-container">
         <div class="register-header">
-            <h1><?php echo APP_NAME; ?></h1>
+            <h1>Área Dev</h1>
             <p>Crie sua conta para começar</p>
         </div>
 

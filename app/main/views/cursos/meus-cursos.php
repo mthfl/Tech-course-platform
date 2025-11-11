@@ -235,6 +235,20 @@
             overflow: hidden;
         }
 
+        .course-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+            border-radius: 8px;
+        }
+
+        @media (max-width: 768px) {
+            .course-image img {
+                object-position: center 70%;
+            }
+        }
+
         .course-image::before {
             content: '';
             position: absolute;
@@ -479,7 +493,11 @@
                 ?>
                     <div class="course-card">
                         <div class="course-image">
-                            <i class="fas fa-book-open"></i>
+                            <?php if (!empty($curso['imagem_capa'])): ?>
+                                <img src="<?php echo BASE_PATH; ?>/uploads/cursos/<?php echo htmlspecialchars($curso['imagem_capa']); ?>" alt="<?php echo htmlspecialchars($curso['titulo']); ?>" style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px;">
+                            <?php else: ?>
+                                <i class="fas fa-book-open"></i>
+                            <?php endif; ?>
                         </div>
                         <div class="course-card-body">
                             <h3><?php echo htmlspecialchars($curso['titulo']); ?></h3>

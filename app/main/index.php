@@ -12,6 +12,7 @@ require_once __DIR__ . '/controllers/DashboardController.php';
 require_once __DIR__ . '/controllers/CursoController.php';
 require_once __DIR__ . '/controllers/VideoController.php';
 require_once __DIR__ . '/controllers/AtividadeController.php';
+require_once __DIR__ . '/controllers/ApiController.php';
 
 $request_uri = $_SERVER['REQUEST_URI'];
 
@@ -124,6 +125,15 @@ switch ($route) {
     case 'responder-atividade':
         $controller = new AtividadeController();
         $controller->responder();
+        break;
+        
+    case 'api':
+        if ($param === 'progresso' && isset($segments[2])) {
+            $controller = new ApiController();
+            $controller->progresso($segments[2]);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Endpoint não encontrado']);
+        }
         break;
         
     default:
