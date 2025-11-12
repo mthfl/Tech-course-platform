@@ -64,6 +64,16 @@ class Usuario {
         return $stmt->fetch();
     }
     
+    public function atualizarNivel($id, $novo_nivel) {
+        $query = "UPDATE " . $this->table . " SET nivel_conta = :nivel_conta WHERE id = :id";
+        
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':nivel_conta', $novo_nivel);
+        $stmt->bindParam(':id', $id);
+        
+        return $stmt->execute();
+    }
+    
     // Métodos de recompensa removidos - agora apenas nível do usuário importa
     // O acesso aos cursos é controlado apenas pelo nível_requerido do curso
     

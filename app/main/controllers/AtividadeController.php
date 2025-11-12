@@ -174,6 +174,32 @@ class AtividadeController {
             if ($modulo) {
                 $progresso_curso = $cursoModel->calcularProgresso($_SESSION['usuario_id'], $modulo['curso_id']);
                 $curso_concluido = ($progresso_curso >= 100);
+                
+                // Se o curso foi concluído, promover nível do usuário conforme o nível do curso
+                if ($curso_concluido) {
+                    $curso_info = $cursoModel->buscarPorId($modulo['curso_id']);
+                    if ($curso_info && isset($curso_info['nivel_requerido'])) {
+                        $nivel_atual = $_SESSION['usuario_nivel'] ?? 'iniciante';
+                        $nivel_curso = $curso_info['nivel_requerido'];
+                        // Promove apenas se o nível atual do usuário corresponde ao nível do curso concluído
+                        $mapa_promocao = [
+                            'iniciante' => 'intermediario',
+                            'intermediario' => 'avancado',
+                            'avancado' => 'premium',
+                            'premium' => 'premium'
+                        ];
+                        
+                        if ($nivel_atual === $nivel_curso) {
+                            $novo_nivel = $mapa_promocao[$nivel_atual] ?? $nivel_atual;
+                            if ($novo_nivel !== $nivel_atual) {
+                                $usuarioModel = new Usuario();
+                                if ($usuarioModel->atualizarNivel($_SESSION['usuario_id'], $novo_nivel)) {
+                                    $_SESSION['usuario_nivel'] = $novo_nivel;
+                                }
+                            }
+                        }
+                    }
+                }
             }
             
             echo json_encode([

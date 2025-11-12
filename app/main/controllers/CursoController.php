@@ -40,6 +40,28 @@ class CursoController {
             if ($progresso >= 100 && !isset($_SESSION['parabens_conclusao_' . $id])) {
                 $_SESSION['sucesso'] = 'Parabéns! Você concluiu 100% do curso!';
                 $_SESSION['parabens_conclusao_' . $id] = true;
+                
+                // Promove nível do usuário conforme o nível do curso concluído
+                if (isset($curso['nivel_requerido'])) {
+                    $nivel_atual = $_SESSION['usuario_nivel'] ?? 'iniciante';
+                    $nivel_curso = $curso['nivel_requerido'];
+                    $mapa_promocao = [
+                        'iniciante' => 'intermediario',
+                        'intermediario' => 'avancado',
+                        'avancado' => 'premium',
+                        'premium' => 'premium'
+                    ];
+                    
+                    if ($nivel_atual === $nivel_curso) {
+                        $novo_nivel = $mapa_promocao[$nivel_atual] ?? $nivel_atual;
+                        if ($novo_nivel !== $nivel_atual) {
+                            $usuarioModel = new Usuario();
+                            if ($usuarioModel->atualizarNivel($_SESSION['usuario_id'], $novo_nivel)) {
+                                $_SESSION['usuario_nivel'] = $novo_nivel;
+                            }
+                        }
+                    }
+                }
             }
         }
         

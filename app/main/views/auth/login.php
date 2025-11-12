@@ -7,38 +7,78 @@
     <title>Login - <?php echo APP_NAME; ?></title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- Added Poppins font to match registro.html -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        /* Applied exact same design system from registro.html */
+        :root {
+            --color-primary: #00b348;
+            --color-primary-dark: #007A33;
+            --color-secondary: #ffb733;
+            --color-background: #0a0a0a;
+            --color-surface: #1a1a1a;
+            --color-surface-elevated: #242424;
+            --color-border: rgba(255, 255, 255, 0.1);
+            --color-text-primary: #ffffff;
+            --color-text-secondary: #94a3b8;
+            --color-text-muted: #64748b;
+            --color-error: #ef4444;
+            --color-success: var(--color-primary);
+            
+            --spacing-xs: 0.5rem;
+            --spacing-sm: 0.75rem;
+            --spacing-md: 1rem;
+            --spacing-lg: 1.5rem;
+            --spacing-xl: 2rem;
+            --spacing-2xl: 3rem;
+            
+            --radius-sm: 0.5rem;
+            --radius-md: 0.75rem;
+            --radius-lg: 1rem;
+            --radius-xl: 1.25rem;
+            
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.2);
+            --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.3);
+            --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.4);
+            --shadow-primary: 0 8px 24px rgba(0, 179, 72, 0.25);
+        }
+
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+        }
 
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #1a1a1a;
-            background-image: radial-gradient(circle at 10% 20%, rgba(52, 152, 219, 0.05) 0%, rgba(52, 152, 219, 0) 20%),
-                              radial-gradient(circle at 90% 80%, rgba(46, 204, 113, 0.05) 0%, rgba(46, 204, 113, 0) 20%);
+            background-color: var(--color-background);
+            background-image: radial-gradient(circle at 10% 20%, rgba(0, 179, 72, 0.06) 0%, transparent 50%),
+                              radial-gradient(circle at 90% 80%, rgba(255, 183, 51, 0.04) 0%, transparent 50%);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 20px;
+            padding: var(--spacing-lg);
+            color: var(--color-text-primary);
+            line-height: 1.6;
         }
 
         .login-container {
-            background: rgba(45, 45, 45, 0.9);
-            padding: 40px;
-            border-radius: 20px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            background: var(--color-surface);
+            padding: var(--spacing-2xl);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-lg);
             width: 100%;
             max-width: 450px;
-            animation: fadeInUp 0.8s ease-out;
-            border: 1px solid rgba(0, 179, 72, 0.2);
+            animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            border: 1px solid var(--color-border);
         }
 
         @keyframes fadeInUp {
             from {
                 opacity: 0;
-                transform: translateY(30px);
+                transform: translateY(20px);
             }
             to {
                 opacity: 1;
@@ -48,74 +88,82 @@
 
         .login-header {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: var(--spacing-xl);
         }
 
         .login-header h1 {
-            color: #ffffff;
-            font-size: 32px;
+            color: var(--color-text-primary);
+            font-size: 2rem;
             font-family: 'Poppins', sans-serif;
             font-weight: 700;
-            margin-bottom: 10px;
+            margin-bottom: var(--spacing-sm);
+            background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .login-header p {
-            color: #94a3b8;
-            font-size: 16px;
+            color: var(--color-text-secondary);
+            font-size: 0.9375rem;
         }
 
         .input-group {
             position: relative;
-            margin-bottom: 24px;
+            margin-bottom: var(--spacing-lg);
         }
 
         .input-group input {
             width: 100%;
-            padding: 14px 16px 14px 48px;
-            border: 2px solid rgba(0, 179, 72, 0.3);
-            border-radius: 12px;
-            font-size: 16px;
-            transition: all 0.3s;
-            background: rgba(30, 30, 30, 0.8);
+            padding: 0.875rem 1rem 0.875rem 3rem;
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-md);
+            font-size: 0.9375rem;
+            transition: all 0.2s ease;
+            background: var(--color-surface-elevated);
             font-family: 'Inter', sans-serif;
-            color: #ffffff;
+            color: var(--color-text-primary);
         }
 
         .input-group input::placeholder {
-            color: #94a3b8;
+            color: var(--color-text-muted);
         }
 
         .input-group input:focus {
             outline: none;
-            border-color: #00b348;
-            box-shadow: 0 0 0 3px rgba(0, 179, 72, 0.2);
-            background: rgba(30, 30, 30, 0.95);
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px rgba(0, 179, 72, 0.1);
+            background: var(--color-surface-elevated);
         }
 
         .input-icon {
             position: absolute;
-            left: 16px;
+            left: 1rem;
             top: 50%;
             transform: translateY(-50%);
-            color: #00b348;
-            font-size: 18px;
+            color: var(--color-primary);
+            font-size: 1.125rem;
         }
 
         .btn {
             width: 100%;
-            padding: 14px;
-            background: linear-gradient(135deg, #00b348 0%, #007A33 100%);
+            padding: 0.875rem 1.5rem;
+            background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
             color: white;
             border: none;
-            border-radius: 12px;
-            font-size: 16px;
+            border-radius: var(--radius-md);
+            font-size: 0.9375rem;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.2s ease;
             font-family: 'Poppins', sans-serif;
-            box-shadow: 0 8px 20px rgba(0, 179, 72, 0.3);
+            box-shadow: var(--shadow-primary);
             position: relative;
             overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--spacing-sm);
         }
 
         .btn::before {
@@ -126,7 +174,7 @@
             width: 100%;
             height: 100%;
             background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-            transition: left 0.5s;
+            transition: left 0.5s ease;
         }
 
         .btn:hover::before {
@@ -135,55 +183,85 @@
 
         .btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 15px 35px rgba(0, 179, 72, 0.4);
+            box-shadow: 0 12px 28px rgba(0, 179, 72, 0.35);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn:focus-visible {
+            outline: 2px solid var(--color-primary);
+            outline-offset: 2px;
         }
 
         .alert {
-            padding: 14px 18px;
-            border-radius: 12px;
-            margin-bottom: 24px;
-            font-size: 14px;
+            padding: 0.875rem 1rem;
+            border-radius: var(--radius-md);
+            margin-bottom: var(--spacing-lg);
+            font-size: 0.875rem;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: var(--spacing-sm);
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .alert i {
+            flex-shrink: 0;
         }
 
         .alert-error {
-            background: rgba(239, 68, 68, 0.2);
-            border: 1px solid #ef4444;
-            color: #ef4444;
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: var(--color-error);
         }
 
         .alert-success {
-            background: rgba(0, 179, 72, 0.2);
-            border: 1px solid #00b348;
-            color: #00b348;
+            background: rgba(0, 179, 72, 0.1);
+            border: 1px solid rgba(0, 179, 72, 0.3);
+            color: var(--color-success);
         }
 
         .register-link {
             text-align: center;
-            margin-top: 24px;
-            color: #94a3b8;
+            margin-top: var(--spacing-lg);
+            color: var(--color-text-secondary);
+            font-size: 0.875rem;
         }
 
         .register-link a {
-            color: #00b348;
+            color: var(--color-primary);
             text-decoration: none;
             font-weight: 600;
-            transition: all 0.3s;
+            transition: color 0.2s ease;
         }
 
         .register-link a:hover {
-            color: #ffb733;
+            color: var(--color-secondary);
         }
 
         @media (max-width: 480px) {
             .login-container {
-                padding: 30px 20px;
+                padding: var(--spacing-xl) var(--spacing-lg);
             }
 
             .login-header h1 {
-                font-size: 28px;
+                font-size: 1.75rem;
+            }
+
+            .input-group {
+                margin-bottom: var(--spacing-md);
             }
         }
     </style>
@@ -211,6 +289,7 @@
 
         <form method="POST" action="<?php echo BASE_PATH; ?>/login">
             <div class="input-group">
+                <!-- Changed icon position to match registro.html -->
                 <i class="fas fa-envelope input-icon"></i>
                 <input type="email" name="email" placeholder="Email" required>
             </div>
@@ -221,7 +300,8 @@
             </div>
 
             <button type="submit" class="btn">
-                <i class="fas fa-sign-in-alt"></i> Entrar
+                <i class="fas fa-sign-in-alt"></i>
+                <span>Entrar</span>
             </button>
         </form>
 
